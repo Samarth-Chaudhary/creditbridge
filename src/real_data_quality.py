@@ -11,7 +11,7 @@ Produces the authoritative RealDataQualityReport for downstream Part 7 model sco
 import os
 import json
 from datetime import date
-from typing import Dict, Any, List, Optional, Tuple, Union
+from typing import Dict, Any, List, Optional, Tuple, Union, cast
 import numpy as np
 import pandas as pd
 
@@ -82,15 +82,15 @@ def generate_reference_distributions(
         if col in df.columns:
             s = df[col].dropna().astype(float)
             if len(s) > 0:
-                p_min = float(s.min())
+                p_min = float(cast(Any, s.min()))
                 p5 = float(np.percentile(s, 5))
                 p25 = float(np.percentile(s, 25))
                 p50 = float(np.percentile(s, 50))
                 p75 = float(np.percentile(s, 75))
                 p95 = float(np.percentile(s, 95))
-                p_max = float(s.max())
-                mean = float(s.mean())
-                std = float(s.std(ddof=1)) if len(s) > 1 else 0.0
+                p_max = float(cast(Any, s.max()))
+                mean = float(cast(Any, s.mean()))
+                std = float(cast(Any, s.std(ddof=1))) if len(s) > 1 else 0.0
 
                 ref_data["numeric_features"][col] = {
                     "count": int(len(s)),

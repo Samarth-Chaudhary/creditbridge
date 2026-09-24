@@ -10,7 +10,7 @@ history sufficiency metrics.
 
 import uuid
 import datetime
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional, Tuple, cast
 import numpy as np
 import pandas as pd
 
@@ -212,12 +212,12 @@ def build_real_borrower_payload(
     recharge_freq_mo = round(float(telco_count / history_months), 2)
     
     if telco_count > 0:
-        avg_recharge_amt = round(float(telco_txns["amount"].mean()), 2)
+        avg_recharge_amt = round(float(cast(Any, telco_txns["amount"].mean())), 2)
     else:
         avg_recharge_amt = 0.0
 
     if telco_count >= 2 and avg_recharge_amt > 0.0:
-        recharge_vol = round(float(telco_txns["amount"].std(ddof=1) / avg_recharge_amt), 3)
+        recharge_vol = round(float(cast(Any, telco_txns["amount"].std(ddof=1)) / avg_recharge_amt), 3)
     else:
         recharge_vol = 0.0
 
@@ -363,8 +363,8 @@ def build_real_borrower_payload(
         & (~tx_df["is_reversal"])
     )
 
-    p2p_vol = float(tx_df[p2p_mask]["amount"].sum())
-    merchant_vol = float(tx_df[merchant_mask]["amount"].sum())
+    p2p_vol = float(cast(Any, tx_df[p2p_mask]["amount"].sum()))
+    merchant_vol = float(cast(Any, tx_df[merchant_mask]["amount"].sum()))
 
     if p2p_vol == 0.0 and merchant_vol == 0.0:
         p2p_ratio = 1.0  # Neutral baseline

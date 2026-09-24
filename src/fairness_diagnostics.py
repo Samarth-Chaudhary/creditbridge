@@ -14,7 +14,7 @@ and small-sample statistical validity disclosures.
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score
@@ -230,9 +230,9 @@ def evaluate_subgroup_fairness(
             eval_df["age_group"] = pd.Series(binned).astype(str)
 
     total_n = len(eval_df)
-    overall_approval = float(eval_df["is_approved_proxy"].mean())
-    overall_mean_score = float(eval_df["credit_score"].mean())
-    overall_default_rate = float(eval_df["defaulted"].mean()) if "defaulted" in eval_df.columns else None
+    overall_approval = float(cast(Any, eval_df["is_approved_proxy"].mean()))
+    overall_mean_score = float(cast(Any, eval_df["credit_score"].mean()))
+    overall_default_rate = float(cast(Any, eval_df["defaulted"].mean())) if "defaulted" in eval_df.columns else None
 
     # Dimensions to evaluate
     dimensions = []
@@ -253,13 +253,13 @@ def evaluate_subgroup_fairness(
         for g in unique_groups:
             sub = eval_df[eval_df[dim] == g]
             if len(sub) >= small_sample_threshold:
-                group_rates[g] = float(sub["is_approved_proxy"].mean())
+                group_rates[g] = float(cast(Any, sub["is_approved_proxy"].mean()))
         
         if not group_rates:
             # Fallback if all groups are small
             for g in unique_groups:
                 sub = eval_df[eval_df[dim] == g]
-                group_rates[g] = float(sub["is_approved_proxy"].mean())
+                group_rates[g] = float(cast(Any, sub["is_approved_proxy"].mean()))
 
         benchmark_rate = max(group_rates.values()) if group_rates else 1.0
         benchmark_rate = max(benchmark_rate, 1e-6)  # avoid div by zero
@@ -277,7 +277,7 @@ def evaluate_subgroup_fairness(
 
             sub_scores = np.asarray(sub["credit_score"])
             sub_tiers = sub["risk_tier"]
-            sub_approval = float(sub["is_approved_proxy"].mean())
+            sub_approval = float(cast(Any, sub["is_approved_proxy"].mean()))
             air = sub_approval / benchmark_rate
 
             if air < 0.80 and not is_small:
@@ -285,7 +285,7 @@ def evaluate_subgroup_fairness(
                     f"Adverse Impact Warning: Subgroup '{dim}:{g}' has AIR = {air:.2f} (< 0.80 benchmark threshold)."
                 )
 
-            sub_default = float(sub["defaulted"].mean()) if "defaulted" in sub.columns else None
+            sub_default = float(cast(Any, sub["defaulted"].mean())) if "defaulted" in sub.columns else None
             
             # Subgroup AUC if both classes present
             sub_auc = None
