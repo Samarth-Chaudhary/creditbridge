@@ -988,7 +988,7 @@ with tab1:
         # Precompute real timeline trend based on credit score distribution & simulated monthly approval cohorts
         months = ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"]
         # Cohort average scores mapped to real calibrated portfolio averages
-        mean_portfolio_score = float(scored_df["credit_score"].mean())
+        mean_portfolio_score = float(np.mean(scored_df["credit_score"].to_numpy()))
         score_trend = [
             round(mean_portfolio_score - 14.5, 1),
             round(mean_portfolio_score - 8.2, 1),
@@ -1057,10 +1057,11 @@ with tab1:
 
         st.plotly_chart(fig_hero, use_container_width=True, config={"displayModeBar": False})
 
+        avg_annual_income = float(np.mean(raw_df['monthly_income_estimate'].to_numpy()) * 12)
         st.markdown(f"""
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 14px; margin-top: 8px;">
                 <div style="font-size: 0.82rem; color: #9C9088;">
-                    Average annual income rate <strong style="color: #F5F1EA; font-weight: 600;">₹{raw_df['monthly_income_estimate'].mean()*12:,.0f}</strong>
+                    Average annual income rate <strong style="color: #F5F1EA; font-weight: 600;">₹{avg_annual_income:,.0f}</strong>
                 </div>
                 <div style="display: flex; gap: 14px; font-size: 0.76rem; color: #9C9088;">
                     <span style="display: flex; align-items: center; gap: 6px;">
@@ -1076,7 +1077,7 @@ with tab1:
 
     with cards_col:
         # "My cards" analog -> Underwriting Portfolios with realistic stacked visual cards
-        mean_income = float(raw_df['monthly_income_estimate'].mean())
+        mean_income = float(np.mean(raw_df['monthly_income_estimate'].to_numpy()))
         st.markdown(f"""
         <div class="fin-card" style="height: 100%;">
             <div class="fin-card-header">
@@ -1128,7 +1129,7 @@ with tab1:
     # Distinct KPI Ring calculation (Fix for known bug b: each ring bound to distinct real metric)
     auc_val = float(model_bundle.get("all_metrics", {}).get("logistic_regression", {}).get("auc", 0.6240)) * 100
     # Clean repayment / Non-default rate from dataset (distinct from AUC)
-    clean_repay_rate = float((1.0 - raw_df["defaulted"].mean()) * 100)
+    clean_repay_rate = float((1.0 - np.mean(raw_df["defaulted"].to_numpy())) * 100)
 
     ring1_html = render_dark_svg_ring(auc_val, "Model AUC (Separation)", ring_color="#E8792E", size=115, stroke_width=7)
     ring2_html = render_dark_svg_ring(clean_repay_rate, "Clean Repay Cohort", ring_color="#4ADE80", size=115, stroke_width=7)
@@ -1147,7 +1148,7 @@ with tab1:
         """, unsafe_allow_html=True)
 
     with mid_col2:
-        def_rate = float(raw_df["defaulted"].mean() * 100)
+        def_rate = float(np.mean(raw_df["defaulted"].to_numpy()) * 100)
         review_count = int((scored_df["risk_tier"] == "High Risk — Manual Review").sum())
         low_risk_count = int((scored_df["risk_tier"] == "Low Risk").sum())
         mod_risk_count = int((scored_df["risk_tier"] == "Moderate Risk").sum())
@@ -1171,9 +1172,9 @@ with tab1:
         """, unsafe_allow_html=True)
 
     with mid_col3:
-        mean_score = float(scored_df["credit_score"].mean())
-        median_score = float(scored_df["credit_score"].median())
-        mean_income = float(raw_df["monthly_income_estimate"].mean())
+        mean_score = float(np.mean(scored_df["credit_score"].to_numpy()))
+        median_score = float(np.median(scored_df["credit_score"].to_numpy()))
+        mean_income = float(np.mean(raw_df["monthly_income_estimate"].to_numpy()))
 
         st.markdown(f"""
         <div class="fin-card">

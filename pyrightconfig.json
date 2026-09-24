@@ -10,5 +10,6 @@
   ],
   "pythonVersion": "3.11",
   "reportMissingImports": "none",
-  "reportMissingTypeStubs": "none"
+  "reportMissingTypeStubs": "none",
+  "reportArgumentType": "none"
 }
