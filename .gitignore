@@ -1,0 +1,48 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches and virtual environments
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.venv/
+env/
+venv/
+ENV/
+
+# Environment variables & credentials
+.env
+.env.*
+*.env
+*.pem
+*.key
+*.cert
+*.pfx
+secrets.*
+.streamlit/secrets.toml
+
+# Operating System & IDE artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Uploads, temporary files and scratch spaces
+temp/
+tmp/
+uploads/
+scratch/
+*.tmp
+*.bak
+*.swp
+*.npz
+
+# Sensitive statement uploads (prevent committing personal financial data)
+data/uploads/
+data/statements/
+*.pdf

@@ -1,0 +1,269 @@
+{
+  "metadata": {
+    "source_dataset": "data/synthetic_borrowers.csv",
+    "total_training_records": 8000,
+    "generated_timestamp": "2026-09-20"
+  },
+  "numeric_features": {
+    "age": {
+      "count": 8000,
+      "min": 18.0,
+      "p5": 20.0,
+      "p25": 27.0,
+      "median": 32.0,
+      "p75": 37.0,
+      "p95": 44.0,
+      "max": 60.0,
+      "mean": 32.0685,
+      "std": 7.341
+    },
+    "monthly_income_estimate": {
+      "count": 8000,
+      "min": 8084.19,
+      "p5": 12253.688,
+      "p25": 18556.3375,
+      "median": 24256.38,
+      "p75": 31254.8925,
+      "p95": 45027.8385,
+      "max": 74729.27,
+      "mean": 25947.2219,
+      "std": 10647.5532
+    },
+    "electricity_bill_ontime_rate": {
+      "count": 8000,
+      "min": 0.0,
+      "p5": 0.25,
+      "p25": 0.417,
+      "median": 0.583,
+      "p75": 0.667,
+      "p95": 0.833,
+      "max": 1.0,
+      "mean": 0.5646,
+      "std": 0.1714
+    },
+    "electricity_bill_avg_delay_days": {
+      "count": 7801,
+      "min": 0.0,
+      "p5": 0.8,
+      "p25": 2.2,
+      "median": 3.8,
+      "p75": 6.2,
+      "p95": 11.6,
+      "max": 119.7873,
+      "mean": 5.0859,
+      "std": 7.366
+    },
+    "recharge_frequency_per_month": {
+      "count": 8000,
+      "min": 1.0,
+      "p5": 1.0,
+      "p25": 1.0,
+      "median": 2.0,
+      "p75": 3.0,
+      "p95": 6.0,
+      "max": 7.0,
+      "mean": 2.3817,
+      "std": 1.5658
+    },
+    "avg_recharge_amount": {
+      "count": 8000,
+      "min": 65.05,
+      "p5": 85.241,
+      "p25": 208.3975,
+      "median": 301.34,
+      "p75": 385.68,
+      "p95": 703.966,
+      "max": 799.0,
+      "mean": 321.5502,
+      "std": 176.3352
+    },
+    "recharge_amount_volatility": {
+      "count": 8000,
+      "min": 0.02,
+      "p5": 0.06,
+      "p25": 0.145,
+      "median": 0.248,
+      "p75": 0.357,
+      "p95": 0.64,
+      "max": 0.75,
+      "mean": 0.2729,
+      "std": 0.1653
+    },
+    "days_since_last_recharge_lapse": {
+      "count": 7760,
+      "min": 1.0,
+      "p5": 8.8,
+      "p25": 35.3,
+      "median": 81.0,
+      "p75": 161.925,
+      "p95": 365.0,
+      "max": 365.0,
+      "mean": 114.4335,
+      "std": 101.5181
+    },
+    "monthly_upi_transaction_count": {
+      "count": 7681,
+      "min": 4.0,
+      "p5": 22.0,
+      "p25": 57.0,
+      "median": 72.0,
+      "p75": 80.0,
+      "p95": 90.0,
+      "max": 886.0,
+      "mean": 69.0086,
+      "std": 49.353
+    },
+    "monthly_upi_inflow_avg": {
+      "count": 7720,
+      "min": 5795.49,
+      "p5": 11152.253,
+      "p25": 16823.555,
+      "median": 22378.095,
+      "p75": 28852.1625,
+      "p95": 43154.3155,
+      "max": 343873.2,
+      "mean": 24466.168,
+      "std": 14000.2278
+    },
+    "monthly_upi_outflow_avg": {
+      "count": 7720,
+      "min": 4771.02,
+      "p5": 9486.8515,
+      "p25": 14399.625,
+      "median": 19064.725,
+      "p75": 24694.79,
+      "p95": 35728.5595,
+      "max": 66596.41,
+      "mean": 20324.8348,
+      "std": 8326.2989
+    },
+    "upi_inflow_volatility_coefficient": {
+      "count": 7640,
+      "min": 0.08,
+      "p5": 0.08,
+      "p25": 0.151,
+      "median": 0.2635,
+      "p75": 0.425,
+      "p95": 0.757,
+      "max": 0.95,
+      "mean": 0.3162,
+      "std": 0.2111
+    },
+    "p2p_vs_merchant_txn_ratio": {
+      "count": 8000,
+      "min": 0.09,
+      "p5": 0.3,
+      "p25": 0.54,
+      "median": 0.82,
+      "p75": 1.22,
+      "p95": 2.19,
+      "max": 5.0,
+      "mean": 0.9755,
+      "std": 0.6321
+    },
+    "avg_weekly_gig_hours": {
+      "count": 3560,
+      "min": 10.0,
+      "p5": 25.2,
+      "p25": 35.3,
+      "median": 42.2,
+      "p75": 49.1,
+      "p95": 58.8,
+      "max": 74.8,
+      "mean": 42.1854,
+      "std": 10.1356
+    },
+    "gig_platform_rating": {
+      "count": 3560,
+      "min": 3.0,
+      "p5": 4.23,
+      "p25": 4.65,
+      "median": 4.83,
+      "p75": 4.93,
+      "p95": 4.99,
+      "max": 5.0,
+      "mean": 4.7456,
+      "std": 0.2559
+    },
+    "active_weeks_last_6_months": {
+      "count": 3560,
+      "min": 13.0,
+      "p5": 18.0,
+      "p25": 20.0,
+      "median": 21.0,
+      "p75": 23.0,
+      "p95": 24.0,
+      "max": 26.0,
+      "mean": 21.3208,
+      "std": 1.9648
+    },
+    "earnings_coefficient_of_variation": {
+      "count": 3560,
+      "min": 0.12,
+      "p5": 0.1469,
+      "p25": 0.2347,
+      "median": 0.351,
+      "p75": 0.466,
+      "p95": 0.558,
+      "max": 0.58,
+      "mean": 0.3518,
+      "std": 0.1327
+    },
+    "phone_number_tenure_months": {
+      "count": 8000,
+      "min": 3.0,
+      "p5": 10.0,
+      "p25": 20.0,
+      "median": 33.0,
+      "p75": 54.0,
+      "p95": 104.0,
+      "max": 180.0,
+      "mean": 41.5279,
+      "std": 30.5654
+    },
+    "app_account_age_months": {
+      "count": 8000,
+      "min": 2.0,
+      "p5": 3.0,
+      "p25": 6.0,
+      "median": 12.0,
+      "p75": 21.0,
+      "p95": 45.0,
+      "max": 60.0,
+      "mean": 15.7305,
+      "std": 13.2412
+    }
+  },
+  "categorical_features": {
+    "occupation_type": {
+      "allowed_categories": [
+        "daily_wage_labor",
+        "freelance_digital",
+        "gig_delivery",
+        "gig_rideshare",
+        "informal_retail",
+        "small_trader"
+      ],
+      "frequencies": {
+        "gig_delivery": 0.2464,
+        "gig_rideshare": 0.1986,
+        "small_trader": 0.1559,
+        "informal_retail": 0.152,
+        "daily_wage_labor": 0.1495,
+        "freelance_digital": 0.0976
+      }
+    },
+    "city_tier": {
+      "allowed_categories": [
+        "tier_1",
+        "tier_2",
+        "tier_3"
+      ],
+      "frequencies": {
+        "tier_1": 0.3882,
+        "tier_2": 0.3585,
+        "tier_3": 0.2532
+      }
+    }
+  }
+}
