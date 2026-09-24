@@ -1,0 +1,5 @@
+Date,Description,Debit,Credit,Balance
+2023-01-01,Inflow Cash,0.00,10000.00,10000.00
+2023-01-05,Swiggy Food,300.00,0.00,9700.00
+2023-01-10,Airtel Recharge,299.00,0.00,9401.00
+2023-01-16,Zomato Food,450.00,0.00,8951.00

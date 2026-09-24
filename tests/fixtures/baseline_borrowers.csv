@@ -1,0 +1,5 @@
+borrower_id,age,occupation_type,city_tier,monthly_income_estimate,electricity_bill_ontime_rate,electricity_bill_avg_delay_days,recharge_frequency_per_month,avg_recharge_amount,recharge_amount_volatility,days_since_last_recharge_lapse,monthly_upi_transaction_count,monthly_upi_inflow_avg,monthly_upi_outflow_avg,upi_inflow_volatility_coefficient,p2p_vs_merchant_txn_ratio,avg_weekly_gig_hours,gig_platform_rating,active_weeks_last_6_months,earnings_coefficient_of_variation,phone_number_tenure_months,app_account_age_months,defaulted
+0e4cde06-4b7d-46d3-bb72-0538f14300b4,36,gig_delivery,tier_1,27852.52,0.75,0.8,3,253.84,0.222,53.9,80.0,25732.0,21394.31,0.231,1.01,32.6,4.87,19.0,0.14,25,25,0
+d3ae04ea-456d-4582-9543-14fcc7cd16a9,43,gig_rideshare,tier_1,42772.78,0.75,1.1,2,594.13,0.053,365.0,69.0,34727.66,,0.218,0.72,46.3,4.37,21.0,0.397,45,6,0
+dbe03e32-3d66-466e-aeb2-d403bf4e43fe,30,daily_wage_labor,tier_1,13333.16,0.333,4.7,6,95.44,0.502,32.3,34.0,11533.54,11186.82,0.237,0.8,,,,,105,2,1
+cb367f91-5faa-4977-b3f5-c06f5f2af92b,46,gig_delivery,tier_3,15887.48,0.75,104.2472152,3,72.19,0.685,45.6,81.0,15692.94,13406.35,0.218,1.14,41.4,4.64,21.0,0.476,41,3,1

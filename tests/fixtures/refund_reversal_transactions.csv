@@ -1,0 +1,9 @@
+Date,Description,Debit,Credit,Balance
+2023-01-05,Monthly Wage Inflow,0.00,28000.00,28000.00
+2023-01-08,Swiggy Bangalore,520.00,0.00,27480.00
+2023-01-09,Swiggy Order Refund,0.00,520.00,28000.00
+2023-01-14,Airtel Recharge Failed,299.00,0.00,27701.00
+2023-01-15,Reversal Failed Txn Rev,0.00,299.00,28000.00
+2023-01-20,Cred App Cashback,0.00,50.00,28050.00
+2023-01-25,Transfer To Own Account,10000.00,0.00,18050.00
+2023-01-26,Internal Transfer Sweep,0.00,5000.00,23050.00

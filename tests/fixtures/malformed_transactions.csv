@@ -1,0 +1,7 @@
+Date,Description,Debit,Credit,Balance
+2023-01-05,Valid Salary,0.00,25000.00,25000.00
+invalid_date_str,Corrupt Row 1,100.00,0.00,24900.00
+2023-01-10,Contradictory Debit Credit Row,500.00,500.00,24400.00
+2023-01-15,Non Numeric Amount,abc,0.00,24400.00
+,Missing Date Row,200.00,0.00,24200.00
+2023-01-20,Valid Recharge,299.00,0.00,23901.00
