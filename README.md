@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Streamlit Dashboard](https://img.shields.io/badge/Streamlit-9--Tab%20Interactive%20Console-FF4B4B?logo=streamlit)](dashboard/app.py)
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Underwriting%20Portal-10B981?logo=githubpages)](https://samarth-chaudhary.github.io/creditbridge/)
-[![Hosted App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=Samarth-Chaudhary/creditbridge&branch=main&mainModule=dashboard/app.py)
+[![Hosted App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://samarth-chaudhary-creditbridge-dashboardapp-vzrsrp.streamlit.app)
 
 > [!IMPORTANT]
 > **RESEARCH & ENGINEERING PROTOTYPE DISCLOSURE**:
@@ -201,8 +201,7 @@ The official 9-tab **Streamlit Master Underwriting & Governance Dashboard** (`da
    - **URL**: [https://samarth-chaudhary.github.io/creditbridge/](https://samarth-chaudhary.github.io/creditbridge/)
    - **Behavior**: Seamlessly displays the full Streamlit dashboard directly on GitHub Pages via automated CI/CD ([`.github/workflows/pages.yml`](.github/workflows/pages.yml)).
 2. **Streamlit Community Cloud Direct Launch**:
-   - **App URL**: [https://creditbridge.streamlit.app](https://creditbridge.streamlit.app)
-   - **1-Click Deploy**: [Deploy CreditBridge on Streamlit Cloud](https://share.streamlit.io/deploy?repository=Samarth-Chaudhary/creditbridge&branch=main&mainModule=dashboard/app.py)
+   - **Live App URL**: [https://samarth-chaudhary-creditbridge-dashboardapp-vzrsrp.streamlit.app](https://samarth-chaudhary-creditbridge-dashboardapp-vzrsrp.streamlit.app)
    - **Architecture**: Runs the complete 9-tab operational suite (Executive Overview, Borrower Assessment with SHAP explainability, Decile Calibration, Fair Lending Disparate Impact Auditing, Data Quality Provenance, Population Drift PSI Surveillance, Economic Policy Simulator, Model Registry Integrity, and Limitations).
    - **Theme**: Pinned to dark fintech tokens in [`.streamlit/config.toml`](.streamlit/config.toml).
 
