@@ -1,25 +1,24 @@
-# Data Card: CreditBridge Alternative Credit Dataset (Synthetic V2)
+# Data Card: CreditBridge Alternative Credit Dataset (Synthetic V2 & Temporal Phase 1)
 
 ## 1. Dataset Overview
 
 | Attribute | Specification |
 | :--- | :--- |
 | **Dataset Name** | CreditBridge Alternative Credit Dataset |
-| **Version** | 2.0.0 (Synthetic Baseline) |
-| **Release Date** | September 2026 |
-| **Record Count** | 8,000 synthetic borrower profiles |
-| **Feature Count** | 22 columns (1 identifier, 3 demographic/self-reported, 17 behavioral proxies, 1 binary target) |
-| **Data Modality** | Tabular (Continuous, Discrete, and Low-Cardinality Categorical) |
-| **Target Variable** | `defaulted` (Binary: 0 = Fully Repaid, 1 = Default / 90+ DPD Proxy) |
-| **Primary File** | `data/synthetic_borrowers.csv` (1,193,374 bytes) |
-| **Generator Script** | `data/generate_synthetic_data.py` (Random Seed = 42) |
-| **Distribution Schema** | `data/reference_distributions.json` |
+| **Active Version** | `v2.0-temporal` (Phase 1 Defensible Temporal Generator) |
+| **Baseline Reference Version** | `v1.0-synthetic` (`data/synthetic_borrowers.csv`, 1,193,374 bytes) |
+| **Temporal Dataset Path** | `data/temporal_synthetic_borrowers.csv` (8,000 rows, SHA-256 verified) |
+| **Temporal Cohort Split** | Train: 5,000 rows \| Validation: 1,500 rows \| Out-of-Time (OOT): 1,500 rows |
+| **Temporal Contract** | 12-month observation window ($T-12$ to $T-1$) with separate forward 90-day prediction window ($T$ to $T+3$) |
+| **Generator Scripts** | `src/temporal_data_generator.py` (Phase 1) & `data/generate_synthetic_data.py` (Legacy baseline) |
+| **Anti-Leakage Defense** | Automated transaction validation rejecting post-cutoff timestamps (`src/temporal_contract.py`) |
+| **Target Variable** | `defaulted` (Binary: 0 = Fully Repaid, 1 = Default within forward 90-day window) |
 
 ---
 
 ## 2. Dataset Purpose & Intended Domain
 
-CreditBridge addresses the persistent credit gap in India's informal and gig economy, where an estimated 150+ million individuals lack formal credit bureau coverage (CIBIL/Experian score = -1 or "thin file"). 
+CreditBridge addresses the persistent credit gap in India's informal and gig economy, where an estimated 150+ million individuals lack formal credit bureau coverage (formal credit bureau score = -1 or "thin file"). 
 
 Traditional credit underwriting relies on documented pay stubs, income tax returns (ITR), and past loan repayment histories. Independent gig workers (e.g., quick-commerce delivery, rideshare drivers) and informal micro-entrepreneurs (kirana operators, street vendors) transact predominantly via UPI and cash, rendering them invisible to legacy scoring models.
 

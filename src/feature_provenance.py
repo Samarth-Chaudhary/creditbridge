@@ -12,13 +12,12 @@ Guarantees full regulatory transparency:
 - IMPUTED: Replaced downstream by synthetic pipeline median imputer
 """
 
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 from src.real_data_contracts import (
+    RAW_BORROWER_COLUMNS,
     FeatureProvenanceRecord,
     ProvenanceState,
-    RAW_BORROWER_COLUMNS,
 )
 
 

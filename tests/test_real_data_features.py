@@ -5,43 +5,34 @@ Path: tests/test_real_data_features.py
 Tests all 15 mandated testing requirements from Part 5 specification (Sections 20 & 26).
 """
 
-import io
-import datetime
-import pytest
-import pandas as pd
 import numpy as np
-import joblib
+import pandas as pd
+import pytest
 
+from src.feature_provenance import summarize_provenance
 from src.real_data_contracts import (
     RAW_BORROWER_COLUMNS,
     UNAVAILABLE_MODEL_COLUMNS,
-    ManualInputContract,
     FeatureProvenanceRecord,
+    InsufficientHistoryError,
+    InvalidDataError,
+    ManualInputContract,
+    ManualInputContractError,
+    ModelInputContractError,
+    NormalizedCategory,
     ProvenanceState,
     SufficiencyTier,
-    NormalizedCategory,
-    TransactionType,
-    InvalidDataError,
-    InsufficientHistoryError,
-    ModelInputContractError,
-    ManualInputContractError,
-    ParsedStatement,
+)
+from src.real_data_features import (
+    build_real_borrower_payload,
+    evaluate_history_sufficiency,
 )
 from src.real_data_parser import parse_csv_statement
+from src.real_data_validation import validate_borrower_row
+from src.scoring_utils import load_model_bundle, score_borrower
 from src.transaction_classifier import (
     classify_transaction,
-    classify_transactions_df,
-    ClassificationResult,
 )
-from src.feature_provenance import summarize_provenance, create_provenance_record
-from src.real_data_validation import validate_manual_inputs, validate_borrower_row
-from src.real_data_features import (
-    evaluate_history_sufficiency,
-    build_real_borrower_payload,
-)
-from src.feature_engineering import FeaturePipeline
-from src.scoring_utils import load_model_bundle, score_borrower
-
 
 # -----------------------------------------------------------------------------
 # FIXTURES
@@ -224,7 +215,7 @@ def test_income_derivation_excludes_loans_refunds_and_self_transfers(multi_month
 
     row = payload.borrower_df.iloc[0]
     income_val = row["monthly_income_estimate"]
-    
+
     # 6 months, ~156,000 salary + 500 P2P = ~156,500 / 6 = ~26,000 / month
     # Must NOT include the 10,000 loan or 5,000 self-transfer
     assert 24000.0 <= income_val <= 28000.0

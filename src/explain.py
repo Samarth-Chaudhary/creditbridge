@@ -11,14 +11,14 @@ Leverages SHAP (SHapley Additive exPlanations) to produce:
 
 import os
 import sys
-import joblib
+from typing import Any, Dict, List, Optional, Union
+
+import matplotlib
 import numpy as np
 import pandas as pd
-from typing import Union, Dict, Any, List, Optional, Tuple
-import matplotlib
+
 matplotlib.use("Agg")  # Non-interactive headless backend for clean plot saving
 import matplotlib.pyplot as plt
-
 import shap  # type: ignore
 
 # Ensure src can be imported
@@ -28,30 +28,30 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 try:
-    from src.scoring_utils import (
-        SCORE_FACTOR,
-        POPULATION_DEFAULT_RATE,
-        probability_to_credit_score,
-        score_to_tier,
-        load_model_bundle,
-        score_borrower
-    )
     from src.real_data_contracts import (
-        FactorContribution,
         UNAVAILABLE_MODEL_COLUMNS,
+        FactorContribution,
+    )
+    from src.scoring_utils import (
+        POPULATION_DEFAULT_RATE,
+        SCORE_FACTOR,
+        load_model_bundle,
+        probability_to_credit_score,
+        score_borrower,
+        score_to_tier,
     )
 except ImportError:
-    from scoring_utils import (  # type: ignore
-        SCORE_FACTOR,
-        POPULATION_DEFAULT_RATE,
-        probability_to_credit_score,
-        score_to_tier,
-        load_model_bundle,
-        score_borrower
-    )
     from real_data_contracts import (  # type: ignore
-        FactorContribution,
         UNAVAILABLE_MODEL_COLUMNS,
+        FactorContribution,
+    )
+    from scoring_utils import (  # type: ignore
+        POPULATION_DEFAULT_RATE,
+        SCORE_FACTOR,
+        load_model_bundle,
+        probability_to_credit_score,
+        score_borrower,
+        score_to_tier,
     )
 
 
@@ -156,7 +156,7 @@ def explain_single_borrower(borrower_id: str, df: Optional[pd.DataFrame] = None,
     """
     Generates local SHAP explanation and plain-English adverse-action / approval summary
     for a specific borrower.
-    
+
     Parameters:
     -----------
     borrower_id : str
@@ -165,7 +165,7 @@ def explain_single_borrower(borrower_id: str, df: Optional[pd.DataFrame] = None,
         Dataframe to search for borrower (defaults to synthetic_borrowers.csv).
     save_waterfall_path : Optional[str]
         Optional file path to save individual waterfall plot.
-        
+
     Returns:
     --------
     dict containing:
@@ -232,7 +232,7 @@ def explain_single_borrower(borrower_id: str, df: Optional[pd.DataFrame] = None,
         feat = feature_names[idx]
         delta = int(point_deltas[idx])
         human_name = FEATURE_NAME_MAP.get(feat, feat.replace("_", " "))
-        
+
         if delta < 0:
             neg_drivers.append((human_name, delta))
         elif delta > 0:

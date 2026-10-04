@@ -1,0 +1,9 @@
+{
+  "latest_champion_id": "exp_phase1_20261004T061033Z",
+  "timestamp": "20261004T061033Z",
+  "model_name": "Logistic Regression",
+  "oot_auc": 0.9669,
+  "oot_ks": 82.3,
+  "oot_pr_auc": 0.7823,
+  "experiment_dir": "C:\\Users\\Samarth Chaudhary\\Downloads\\creditbridge\\experiments\\exp_phase1_20261004T061033Z"
+}

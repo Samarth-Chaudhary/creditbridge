@@ -8,27 +8,26 @@ and distribution diagnostics relative to the synthetic baseline distribution.
 Produces the authoritative RealDataQualityReport for downstream Part 7 model scoring handoff.
 """
 
-import os
 import json
+import os
 from datetime import date
-from typing import Dict, Any, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, cast
+
 import numpy as np
 import pandas as pd
 
 from src.real_data_contracts import (
     RAW_BORROWER_COLUMNS,
-    UNAVAILABLE_MODEL_COLUMNS,
-    DistributionStatus,
     AssessmentQualityStatus,
-    SufficiencyTier,
-    ProvenanceState,
-    NormalizedCategory,
+    DistributionStatus,
     FieldQualityDiagnostic,
-    RealDataQualityReport,
+    NormalizedCategory,
     ParsedStatement,
+    ProvenanceState,
     RealBorrowerPayload,
+    RealDataQualityReport,
+    SufficiencyTier,
 )
-
 
 _CACHED_REFERENCE_DISTRIBUTIONS: Optional[Dict[str, Any]] = None
 
@@ -111,7 +110,7 @@ def generate_reference_distributions(
             s_cat = df[col].dropna().astype(str)
             val_counts = s_cat.value_counts(normalize=True).to_dict()
             ref_data["categorical_features"][col] = {
-                "allowed_categories": sorted(list(val_counts.keys())),
+                "allowed_categories": sorted(val_counts.keys()),
                 "frequencies": {k: round(float(v), 4) for k, v in val_counts.items()},
             }
 
@@ -161,7 +160,7 @@ def evaluate_field_distribution(
 ) -> FieldQualityDiagnostic:
     """
     Evaluates an individual feature against the synthetic baseline distribution.
-    
+
     Status Rules:
     - NOT_ASSESSABLE: value is NaN, null, or feature is unavailable.
     - OUTSIDE_OBSERVED_RANGE: strictly < min or > max observed in synthetic baseline.
@@ -272,7 +271,7 @@ def build_data_quality_report(
     Constructs the definitive, comprehensive RealDataQualityReport by synthesizing
     parser diagnostics, transaction intelligence, history sufficiency, evidence coverage,
     and distribution diagnostics.
-    
+
     Parameters:
     -----------
     statement : ParsedStatement
@@ -281,7 +280,7 @@ def build_data_quality_report(
         Output from Part 5 feature mapping.
     ref_distributions : Optional[Dict[str, Any]]
         Pre-loaded reference distribution. Defaults to load_reference_distributions().
-        
+
     Returns:
     --------
     RealDataQualityReport:

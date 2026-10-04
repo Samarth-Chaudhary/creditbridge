@@ -8,23 +8,20 @@ intact: model bundle contracts, legacy scoring helpers, probability calibration,
 risk tier boundaries, and deterministic SHAP attribution on representative synthetic borrowers.
 """
 
-import os
 from pathlib import Path
-import pytest
-import pandas as pd
-import numpy as np
 
+import numpy as np
+import pandas as pd
+
+from src.explain import explain_borrower_record
 from src.scoring_utils import (
-    load_model_bundle,
-    score_borrower,
-    probability_to_credit_score,
-    score_to_tier,
     POPULATION_DEFAULT_RATE,
     SCORE_OFFSET,
-    SCORE_FACTOR,
+    load_model_bundle,
+    probability_to_credit_score,
+    score_borrower,
+    score_to_tier,
 )
-from src.explain import explain_borrower_record
-
 
 # -----------------------------------------------------------------------------
 # 1. BASELINE BORROWER REGRESSION FIXTURES
@@ -89,7 +86,7 @@ def test_feature_names_and_order_at_model_boundary():
     bundle = load_model_bundle()
     feature_names = bundle["feature_names"]
     assert len(feature_names) == 30
-    
+
     # Must contain base numeric features, engineered composite features, and one-hot encodings
     assert "income_stability_index" in feature_names
     assert "payment_reliability_score" in feature_names

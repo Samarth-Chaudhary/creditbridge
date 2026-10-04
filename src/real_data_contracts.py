@@ -11,9 +11,9 @@ from dataclasses import dataclass, field
 from datetime import date
 from enum import Enum
 from typing import Any, Dict, List, Optional
-import pandas as pd
-import numpy as np
 
+import numpy as np
+import pandas as pd
 
 # -----------------------------------------------------------------------------
 # 1. CONTROLLED ENUMS & VOCABULARIES

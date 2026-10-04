@@ -1,0 +1,49 @@
+{
+  "v1.0.0-lr-baseline": {
+    "model_version": "v1.0.0-lr-baseline",
+    "experiment_id": "exp_phase1_reconstruction",
+    "dataset_version": "v1.0.0-temporal-synthetic",
+    "feature_schema_version": "v2.0-22features",
+    "model_type": "LogisticRegression",
+    "metrics": {
+      "roc_auc": 0.6281,
+      "ks_statistic": 21.08,
+      "brier_score": 0.117
+    },
+    "fairness_summary": {
+      "governance_state": "FAIRNESS_MONITORING",
+      "min_air_ratio": 0.9749
+    },
+    "calibration_summary": {
+      "brier_score": 0.117
+    },
+    "artifact_hash_sha256": "bfbabaa4e80accc24495fe9f1ef4c0d1d2bb95b8bf9b835b0744ef6c0729615c",
+    "lifecycle_status": "CHAMPION",
+    "approval_state": "APPROVED_FOR_RESEARCH_PROTOTYPE",
+    "decision_rationale": "Designated baseline champion under strict scientific reconstruction criteria.",
+    "created_timestamp": "2026-10-04T08:41:40.329345+00:00"
+  },
+  "v1.1.0-lr-reweighted": {
+    "model_version": "v1.1.0-lr-reweighted",
+    "experiment_id": "exp_phase2_mitigation",
+    "dataset_version": "v1.0.0-temporal-synthetic",
+    "feature_schema_version": "v2.0-22features",
+    "model_type": "LogisticRegression (Kamiran-Calders Reweighted)",
+    "metrics": {
+      "roc_auc": 0.6187,
+      "brier_score": 0.118
+    },
+    "fairness_summary": {
+      "min_air_ratio": 0.9916,
+      "max_tpr_disparity": 0.0061
+    },
+    "calibration_summary": {
+      "brier_score": 0.118
+    },
+    "artifact_hash_sha256": "bfbabaa4e80accc24495fe9f1ef4c0d1d2bb95b8bf9b835b0744ef6c0729615c",
+    "lifecycle_status": "CHALLENGER",
+    "approval_state": "PENDING_RISK_COMMITTEE_REVIEW",
+    "decision_rationale": "Undergoing evaluation against production champion.",
+    "created_timestamp": "2026-10-04T08:41:40.330413+00:00"
+  }
+}

@@ -8,35 +8,33 @@ canonical transaction DataFrame and structured parse/quality report.
 Adheres strictly to the Part 3 & Part 4 canonical schema and privacy constraints.
 """
 
+import datetime
 import io
 import re
 import uuid
-import datetime
 import warnings as py_warnings
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
+
 import numpy as np
 import pandas as pd
 
+from src.privacy_security import (
+    MAX_CSV_ROWS,
+    validate_upload_security,
+)
 from src.real_data_contracts import (
-    CANONICAL_COLUMNS,
-    ParsedStatement,
-    TransactionType,
-    NormalizedCategory,
-    SourceType,
-    UnsupportedSchemaError,
     AmbiguousColumnError,
-    AmbiguousDateError,
+    CorruptFileError,
     EmptyStatementError,
     FileTypeError,
-    CorruptFileError,
     InvalidDataError,
+    NormalizedCategory,
+    ParsedStatement,
+    SourceType,
+    TransactionType,
+    UnsupportedSchemaError,
 )
-from src.privacy_security import (
-    validate_upload_security,
-    MAX_CSV_ROWS,
-)
-
 
 # -----------------------------------------------------------------------------
 # 1. HEADER ALIAS FAMILIES & RECOGNITION DICTIONARIES
@@ -126,18 +124,18 @@ def _detect_source_type(normalized_cols: Dict[str, str], raw_df: pd.DataFrame) -
     col_names_joined = " ".join(normalized_cols.values()).lower()
     if any(k in col_names_joined for k in ["upi", "vpa", "gpay", "phonepe", "paytm"]):
         return SourceType.CSV_UPI.value
-    
+
     # Check counterparty and category content for UPI / P2P signals
     text_samples = []
     for role in ["counterparty", "category"]:
         col = normalized_cols.get(role)
         if col and col in raw_df.columns:
             text_samples.extend(raw_df[col].dropna().head(30).astype(str).tolist())
-    
+
     sample_text = " ".join(text_samples).upper()
     if any(k in sample_text for k in ["UPI/", "UPI-", "@OK", "@YBL", "@PAYTM", "GPAY", "PHONEPE", "P2P"]):
         return SourceType.CSV_UPI.value
-        
+
     return SourceType.CSV_GENERIC.value
 
 
@@ -156,10 +154,10 @@ def _map_columns(raw_columns: List[str]) -> Dict[str, str]:
             for cleaned_hdr in cleaned_headers:
                 if cleaned_hdr == alias:
                     matched_candidates.append(cleaned_to_raw[cleaned_hdr])
-        
+
         # Deduplicate candidates while preserving order
         unique_matches = list(dict.fromkeys(matched_candidates))
-        
+
         if len(unique_matches) == 1:
             detected[canonical_role] = unique_matches[0]
         elif len(unique_matches) > 1:
@@ -172,7 +170,7 @@ def _map_columns(raw_columns: List[str]) -> Dict[str, str]:
                         break
                 if exact_match:
                     break
-            
+
             if exact_match:
                 detected[canonical_role] = exact_match
             else:
@@ -187,10 +185,10 @@ def _map_columns(raw_columns: List[str]) -> Dict[str, str]:
         raise UnsupportedSchemaError(
             f"Could not identify a mandatory transaction date column. Available headers: {raw_columns}"
         )
-    
+
     has_amount = "amount" in detected
     has_dr_cr_split = ("debit" in detected and "credit" in detected)
-    
+
     if not has_amount and not has_dr_cr_split:
         raise UnsupportedSchemaError(
             f"Could not identify mandatory amount columns (either 'amount' or both 'debit' and 'credit'). "
@@ -204,7 +202,7 @@ def _resolve_date_disambiguation(date_series: Any) -> Tuple[bool, bool]:
     """
     Inspects non-null date strings across the statement to safely disambiguate
     day-first (DD/MM/YYYY) vs month-first (MM/DD/YYYY) without silent guessing.
-    
+
     Returns:
     --------
     (is_ambiguous, dayfirst_flag)
@@ -222,13 +220,13 @@ def _resolve_date_disambiguation(date_series: Any) -> Tuple[bool, bool]:
         if re.search(r"[A-Za-z]{3,}", d_str):
             has_named_month = True
             break
-        
+
         parts = re.findall(r"\d+", d_str)
         if len(parts) >= 3:
             # If standard YYYY-MM-DD format (first part is 4 digits)
             if len(parts[0]) == 4:
                 return False, False  # ISO format is inherently unambiguous
-            
+
             p1, p2 = int(parts[0]), int(parts[1])
             if p1 > 12 and p2 <= 12:
                 has_first_gt_12 = True
@@ -237,7 +235,7 @@ def _resolve_date_disambiguation(date_series: Any) -> Tuple[bool, bool]:
 
     if has_named_month:
         return False, True
-    
+
     if has_first_gt_12 and not has_second_gt_12:
         return False, True   # Unambiguously Day-First (e.g. 25/04/2024)
     elif has_second_gt_12 and not has_first_gt_12:
@@ -256,23 +254,23 @@ def _clean_amount_scalar(val: Any) -> Optional[float]:
     """Safely parses currency amounts with commas and symbols into clean positive float."""
     if val is None or pd.isna(val):
         return None
-    
+
     if isinstance(val, (int, float)):
         return float(val) if not np.isnan(val) else None
-        
+
     s = str(val).strip()
     if not s or s == "-" or s.lower() == "nan" or s.lower() == "null":
         return None
-    
+
     # Strip currency codes and symbols
     s = CURRENCY_SYMBOLS_PATTERN.sub("", s)
     # Remove thousand separators
     s = s.replace(",", "").strip()
-    
+
     # Handle accounting parentheses: (500.00) -> -500.00
     if s.startswith("(") and s.endswith(")"):
         s = "-" + s[1:-1].strip()
-        
+
     try:
         return float(s)
     except ValueError:
@@ -291,29 +289,29 @@ def _classify_low_level_category(narration: str, txn_type: str) -> Tuple[str, fl
         return NormalizedCategory.REFUND.value, 0.95
     if INTERNAL_TRANSFER_PATTERN.search(text):
         return NormalizedCategory.TRANSFER.value, 0.90
-    
+
     # Telecom check
     if any(telco in text for telco in TELCO_ENTITIES):
         return NormalizedCategory.TELECOM_RECHARGE.value, 0.95
-    
+
     # Utility check
     if any(util in text for util in UTILITY_ENTITIES):
         return NormalizedCategory.UTILITY.value, 0.95
-    
+
     # Gig check
     if any(gig in text for gig in GIG_ENTITIES):
         return NormalizedCategory.GIG_INCOME_LIKE.value, 0.90
-        
+
     # Salary check
     if any(sal in text for sal in SALARY_ENTITIES):
         return NormalizedCategory.SALARY_LIKE.value, 0.90
-        
+
     # Merchant check
     if any(biz in text for biz in BUSINESS_ENTITIES):
         return NormalizedCategory.BUSINESS_INFLOW.value, 0.85
     if "MERCHANT" in text or "STORE" in text or "RETAIL" in text:
         return NormalizedCategory.MERCHANT_SPEND.value, 0.80
-        
+
     if "P2P" in text or "TRANSFER" in text:
         return NormalizedCategory.PERSON_LIKE.value, 0.70
 
@@ -332,7 +330,7 @@ def parse_csv_statement(
     """
     Parses a CSV transaction export into a canonical transaction DataFrame and
     structured quality report.
-    
+
     Parameters:
     -----------
     file_or_path : str, Path, BytesIO, StringIO, or bytes
@@ -341,7 +339,7 @@ def parse_csv_statement(
         Optional account holder name to identify self-transfers safely.
     filename : Optional[str]
         Optional original upload filename for security & extension checks.
-        
+
     Returns:
     --------
     ParsedStatement:
@@ -474,7 +472,7 @@ def parse_csv_statement(
         # --- B. Amount & Transaction Type Normalization ---
         raw_amount_val = None
         txn_type = TransactionType.UNKNOWN.value
-        
+
         # Scenario 1: Separate Debit / Credit columns exist
         if "debit" in col_map and "credit" in col_map:
             dr_val = _clean_amount_scalar(row[col_map["debit"]])
@@ -578,7 +576,7 @@ def parse_csv_statement(
 
         # --- D. Refund, Reversal & Internal Transfer Rule Flags ---
         text_for_rules = f"{counterparty_str} {raw_cat_str}".upper()
-        
+
         is_refund_flag = bool(REFUND_PATTERN.search(text_for_rules))
         is_reversal_flag = bool(REVERSAL_PATTERN.search(text_for_rules))
         is_internal_flag = bool(INTERNAL_TRANSFER_PATTERN.search(text_for_rules))

@@ -11,19 +11,19 @@ Implements explicit Responsible AI governance, non-causal attribution boundaries
 and small-sample statistical validity disclosures.
 """
 
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score
 
 from src.scoring_utils import (
+    POPULATION_DEFAULT_RATE,
     load_model_bundle,
     probability_to_credit_score,
     score_to_tier,
-    POPULATION_DEFAULT_RATE,
 )
 
 # -----------------------------------------------------------------------------
@@ -161,7 +161,7 @@ def evaluate_subgroup_fairness(
     """
     Evaluates model score distributions, approval proxy rates, and Adverse Impact
     Ratios (AIR) across age bands, occupation types, and city tiers.
-    
+
     Parameters:
     -----------
     data_or_path : Optional[DataFrame, str, Path]
@@ -170,7 +170,7 @@ def evaluate_subgroup_fairness(
         Persisted model artifact bundle. Defaults to models/credit_model.pkl.
     small_sample_threshold : int
         Minimum cohort size to consider metrics statistically reliable (default 30).
-        
+
     Returns:
     --------
     FairnessEvaluationReport:
@@ -197,10 +197,10 @@ def evaluate_subgroup_fairness(
     # Transform features through FeaturePipeline
     X_input = df.drop(columns=["borrower_id", "defaulted"], errors="ignore")
     X_transformed = pipeline.transform(X_input)
-    
+
     # Generate probabilities and scores
     probs_raw = model.predict_proba(X_transformed)[:, 1]
-    
+
     # Apply Bayesian calibration to reflect empirical population default rate
     odds_raw = probs_raw / np.clip(1.0 - probs_raw, 1e-6, 1.0)
     odds_calibrated = odds_raw * (POPULATION_DEFAULT_RATE / (1.0 - POPULATION_DEFAULT_RATE))
@@ -254,7 +254,7 @@ def evaluate_subgroup_fairness(
             sub = eval_df[eval_df[dim] == g]
             if len(sub) >= small_sample_threshold:
                 group_rates[g] = float(cast(Any, sub["is_approved_proxy"].mean()))
-        
+
         if not group_rates:
             # Fallback if all groups are small
             for g in unique_groups:
@@ -268,7 +268,7 @@ def evaluate_subgroup_fairness(
             sub = eval_df[eval_df[dim] == g]
             n_sub = len(sub)
             is_small = (n_sub < small_sample_threshold)
-            
+
             if is_small:
                 small_sample_warnings.append(
                     f"Subgroup '{dim}:{g}' has small sample size N={n_sub} (< {small_sample_threshold}); "
@@ -286,7 +286,7 @@ def evaluate_subgroup_fairness(
                 )
 
             sub_default = float(cast(Any, sub["defaulted"].mean())) if "defaulted" in sub.columns else None
-            
+
             # Subgroup AUC if both classes present
             sub_auc = None
             if "defaulted" in sub.columns and len(np.unique(sub["defaulted"])) == 2 and n_sub >= 10:

@@ -9,27 +9,27 @@ history sufficiency metrics.
 """
 
 import uuid
-import datetime
-from typing import Dict, Any, List, Optional, Tuple, cast
+from typing import Any, Dict, cast
+
 import numpy as np
 import pandas as pd
 
 from src.real_data_contracts import (
     RAW_BORROWER_COLUMNS,
     UNAVAILABLE_MODEL_COLUMNS,
-    ManualInputContract,
     FeatureProvenanceRecord,
     HistorySufficiencyReport,
-    RealBorrowerPayload,
+    InsufficientHistoryError,
+    InvalidDataError,
+    ManualInputContract,
+    NormalizedCategory,
     ParsedStatement,
     ProvenanceState,
+    RealBorrowerPayload,
     SufficiencyTier,
-    NormalizedCategory,
     TransactionType,
-    InvalidDataError,
-    InsufficientHistoryError,
 )
-from src.real_data_validation import validate_manual_inputs, validate_borrower_row
+from src.real_data_validation import validate_borrower_row, validate_manual_inputs
 
 
 def evaluate_history_sufficiency(
@@ -38,7 +38,7 @@ def evaluate_history_sufficiency(
 ) -> HistorySufficiencyReport:
     """
     Evaluates statement historical coverage according to locked institutional risk policy.
-    
+
     Tiers:
     - <30 days or <15 txns: INSUFFICIENT (Block scoring)
     - 30-89 days: MARGINAL (Allow with manual review cap)
@@ -48,7 +48,7 @@ def evaluate_history_sufficiency(
     dt_series = pd.to_datetime(dates)
     start_date = dt_series.min().date()
     end_date = dt_series.max().date()
-    
+
     total_days = max((end_date - start_date).days + 1, 1)
     approx_months = max(round(total_days / 30.0, 2), 1.0)
 
@@ -103,7 +103,7 @@ def build_real_borrower_payload(
     """
     Transforms canonical transactions and self-reported inputs into a model-compatible
     single-borrower feature DataFrame with parallel provenance records.
-    
+
     Parameters:
     -----------
     statement_or_df : ParsedStatement or pd.DataFrame
@@ -112,7 +112,7 @@ def build_real_borrower_payload(
         Validated user inputs (age, occupation_type, city_tier).
     allow_insufficient_history : bool
         If True, allows feature calculation even for <30 days history (used for diagnostic testing).
-        
+
     Returns:
     --------
     RealBorrowerPayload:
@@ -159,7 +159,7 @@ def build_real_borrower_payload(
             NormalizedCategory.INTERNAL_TRANSFER.value,
         ])
     )
-    
+
     # Check for internal transfer keywords if account_holder_name was provided
     if manual_inputs.account_holder_name:
         name_clean = manual_inputs.account_holder_name.upper()
@@ -210,7 +210,7 @@ def build_real_borrower_payload(
     telco_count = len(telco_txns)
 
     recharge_freq_mo = round(float(telco_count / history_months), 2)
-    
+
     if telco_count > 0:
         avg_recharge_amt = round(float(cast(Any, telco_txns["amount"].mean())), 2)
     else:
@@ -279,7 +279,7 @@ def build_real_borrower_payload(
         days_from_start = (credit_dates - pd.to_datetime(history_report.start_date)).dt.days
         week_buckets = days_from_start // 7
         weekly_inflows = upi_credits.groupby(week_buckets)["amount"].sum()
-        
+
         # Ensure we evaluate over all passed weeks including zero-inflow weeks
         num_weeks = max(int(np.ceil(history_days / 7.0)), 2)
         full_weekly_series = pd.Series(0.0, index=range(num_weeks))
@@ -388,7 +388,7 @@ def build_real_borrower_payload(
     # 8. SELF-REPORTED DEMOGRAPHIC FEATURES
     # -------------------------------------------------------------------------
     borrower_id_val = manual_inputs.borrower_id or f"real_{uuid.uuid4().hex[:10]}"
-    
+
     provenance_records["borrower_id"] = FeatureProvenanceRecord(
         feature_name="borrower_id",
         value=borrower_id_val,

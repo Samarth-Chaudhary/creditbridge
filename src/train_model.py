@@ -14,27 +14,19 @@ Saves the champion model and preprocessing pipeline to models/credit_model.pkl.
 
 import os
 import sys
-import joblib
+from typing import Any, Dict, Union, cast
+
 import numpy as np
 import pandas as pd
-from typing import Dict, Any, Tuple, Union, cast
-
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
+from scipy.stats import ks_2samp
 from sklearn.metrics import (
-    roc_auc_score,
+    classification_report,
+    confusion_matrix,
+    f1_score,
     precision_score,
     recall_score,
-    f1_score,
-    classification_report,
-    confusion_matrix
+    roc_auc_score,
 )
-from scipy.stats import ks_2samp
-
-import xgboost as xgb  # type: ignore
-from xgboost import XGBClassifier  # type: ignore
 
 # Ensure src can be imported
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -42,10 +34,6 @@ project_root = os.path.abspath(os.path.join(current_dir, ".."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-try:
-    from src.feature_engineering import FeaturePipeline, prepare_features
-except ImportError:
-    from feature_engineering import FeaturePipeline, prepare_features  # type: ignore
 
 
 # -----------------------------------------------------------------------------
@@ -112,172 +100,57 @@ def evaluate_model(model: Any, X: pd.DataFrame, y: pd.Series, threshold: float =
     }
 
 
-def train_and_evaluate() -> None:
-    csv_path = os.path.join(project_root, "data", "synthetic_borrowers.csv")
-    if not os.path.exists(csv_path):
-        raise FileNotFoundError(f"Missing {csv_path}. Please run data/generate_synthetic_data.py first.")
+def train_and_evaluate() -> Dict[str, Any]:
+    csv_path = os.path.join(project_root, "data", "temporal_synthetic_borrowers.csv")
 
-    print(f"Loading data from: {csv_path}")
-    raw_df = pd.read_csv(csv_path)
-
-    # 1. Feature Engineering with clean Train/Val/Test Isolation
-    # Split raw records 70% Train, 15% Validation, 15% Test (stratified on defaulted)
-    target_col = "defaulted"
-    y_raw = raw_df[target_col]
-
-    # First split: 85% train_val, 15% test
-    split1 = train_test_split(
-        raw_df,
-        test_size=0.15,
-        stratify=y_raw,
-        random_state=42
-    )
-    df_train_val = cast(pd.DataFrame, split1[0])
-    df_test = cast(pd.DataFrame, split1[1])
-
-    # Second split: from train_val, 70/85 (~82.35%) train, 15/85 (~17.65%) validation
-    val_fraction = 0.15 / 0.85
-    split2 = train_test_split(
-        df_train_val,
-        test_size=val_fraction,
-        stratify=df_train_val[target_col],
-        random_state=42
-    )
-    df_train = cast(pd.DataFrame, split2[0])
-    df_val = cast(pd.DataFrame, split2[1])
-
-    print(f"\n[Dataset Split Summary - 70/15/15 Stratified]")
-    print(f"  Training samples:   {len(df_train):>5} (Defaults: {df_train[target_col].sum()})")
-    print(f"  Validation samples: {len(df_val):>5} (Defaults: {df_val[target_col].sum()})")
-    print(f"  Test samples:       {len(df_test):>5} (Defaults: {df_test[target_col].sum()})")
-
-    # Fit FeaturePipeline strictly on Training split to prevent data leakage
-    pipeline = FeaturePipeline()
-    pipeline.fit(df_train)
-
-    X_train = pipeline.transform(df_train)
-    y_train = cast(pd.Series, df_train[target_col].copy())
-
-    X_val = pipeline.transform(df_val)
-    y_val = cast(pd.Series, df_val[target_col].copy())
-
-    X_test = pipeline.transform(df_test)
-    y_test = cast(pd.Series, df_test[target_col].copy())
-
-    print(f"Transformed feature count: {X_train.shape[1]}")
-
-    # -------------------------------------------------------------------------
-    # 2. MODEL 1: Logistic Regression (Interpretable Baseline)
-    # -------------------------------------------------------------------------
-    print("\nTraining Model 1: Regularized Logistic Regression (cost-sensitive baseline)...")
-    # Standardize features for linear model stability and coefficient interpretability
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_val_scaled = scaler.transform(X_val)
-    X_test_scaled = scaler.transform(X_test)
-
-    lr_model = LogisticRegression(
-        C=0.5,
-        class_weight="balanced",
-        max_iter=1000,
-        random_state=42
-    )
-    lr_model.fit(X_train_scaled, y_train)
-
-    # Wrap in a scikit-learn pipeline for simple downstream inference
-    lr_full_pipeline = Pipeline([
-        ("scaler", scaler),
-        ("classifier", lr_model)
-    ])
-
-    lr_metrics = evaluate_model(lr_full_pipeline, X_test, y_test)
-
-    # -------------------------------------------------------------------------
-    # 3. MODEL 2: XGBoost Classifier (Performance Model)
-    # -------------------------------------------------------------------------
-    # Calculate scale_pos_weight for imbalance
-    n_neg = (y_train == 0).sum()
-    n_pos = (y_train == 1).sum()
-    scale_pos = n_neg / float(n_pos)
-
-    xgb_model = XGBClassifier(
-        n_estimators=180,
-        max_depth=4,
-        learning_rate=0.04,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        scale_pos_weight=scale_pos,
-        random_state=42,
-        eval_metric="logloss"
-    )
-    xgb_model.fit(
-        X_train,
-        y_train,
-        eval_set=[(X_val, y_val)],
-        verbose=False
-    )
-
-    xgb_metrics = evaluate_model(xgb_model, X_test, y_test)
-
-    # -------------------------------------------------------------------------
-    # 4. SIDE-BY-SIDE EVALUATION COMPARISON
-    # -------------------------------------------------------------------------
-    print("\n" + "=" * 88)
-    print(f"{'CREDIT RISK EVALUATION RESULTS (TEST SET)':^88}")
-    print("=" * 88)
-    hdr = f"{'Metric':<25} | {'Logistic Regression':<28} | {'XGBoost Classifier':<28}"
-    print(hdr)
-    print("-" * 88)
-    print(f"{'AUC-ROC':<25} | {lr_metrics['auc']:<28.4f} | {xgb_metrics['auc']:<28.4f}")
-    print(f"{'KS-Statistic (%)':<25} | {lr_metrics['ks_stat']:<28.2f} | {xgb_metrics['ks_stat']:<28.2f}")
-    print(f"{'Precision':<25} | {lr_metrics['precision']:<28.4f} | {xgb_metrics['precision']:<28.4f}")
-    print(f"{'Recall':<25} | {lr_metrics['recall']:<28.4f} | {xgb_metrics['recall']:<28.4f}")
-    print(f"{'F1 Score':<25} | {lr_metrics['f1']:<28.4f} | {xgb_metrics['f1']:<28.4f}")
-    print("=" * 88)
-
-    print("\n--- Confusion Matrix (Logistic Regression) ---")
-    print(lr_metrics["confusion_matrix"])
-
-    print("\n--- Confusion Matrix (XGBoost Classifier) ---")
-    print(xgb_metrics["confusion_matrix"])
-
-    print("\n--- Classification Report (XGBoost) ---")
-    print(xgb_metrics["classification_report"])
-
-    # -------------------------------------------------------------------------
-    # 5. MODEL SELECTION & ARTIFACT PERSISTENCE
-    # -------------------------------------------------------------------------
-    # Champion selection based on AUC-ROC and KS-statistic
-    if xgb_metrics["auc"] >= lr_metrics["auc"]:
-        champion_name = "XGBoost Classifier"
-        champion_model = xgb_model
-        champion_metrics = xgb_metrics
+    # Load or generate temporal dataset
+    if os.path.exists(csv_path):
+        raw_df = pd.read_csv(csv_path)
     else:
-        champion_name = "Logistic Regression"
-        champion_model = lr_full_pipeline
-        champion_metrics = lr_metrics
+        print("Generating new temporal defensible synthetic dataset...")
+        from src.temporal_data_generator import generate_full_temporal_dataset
+        raw_df = generate_full_temporal_dataset(seed=42)
+        raw_df.to_csv(csv_path, index=False)
+        print(f"Persisted temporal dataset to: {csv_path}")
 
-    print(f"\nChampion Model Selected: {champion_name} (AUC: {champion_metrics['auc']:.4f}, KS: {champion_metrics['ks_stat']:.2f}%)")
+    print(f"Loading data from: {csv_path} (shape: {raw_df.shape})")
 
-    models_dir = os.path.join(project_root, "models")
-    os.makedirs(models_dir, exist_ok=True)
-    model_save_path = os.path.join(models_dir, "credit_model.pkl")
+    from src.model_suite import run_full_training_suite
+    results = run_full_training_suite(
+        dataset_df=raw_df,
+        random_seed=42,
+        experiment_id_prefix="exp_phase1",
+        persist_champion_artifact=True,
+    )
 
-    # Bundle model, fitted feature pipeline, feature column names, and test metrics
-    bundle = {
-        "model": champion_model,
-        "model_name": champion_name,
-        "pipeline": pipeline,
-        "feature_names": list(X_train.columns),
-        "test_metrics": champion_metrics,
-        "all_metrics": {
-            "logistic_regression": lr_metrics,
-            "xgboost": xgb_metrics
-        }
-    }
+    all_m = results["all_metrics"]
+    lr_oot = all_m["logistic_regression"]
+    xgb_oot = all_m["xgboost"]
+    base_oot = all_m["base_rate_baseline"]
 
-    joblib.dump(bundle, model_save_path)
-    print(f"Persisted champion model bundle to: {model_save_path}")
+    print("\n" + "=" * 92)
+    print(f"{'CREDIT RISK EVALUATION RESULTS (OUT-OF-TIME OOT SET)':^92}")
+    print("=" * 92)
+    hdr = f"{'Metric':<25} | {'Base-Rate Baseline':<20} | {'Logistic Regression':<20} | {'XGBoost Classifier':<20}"
+    print(hdr)
+    print("-" * 92)
+    print(f"{'ROC-AUC':<25} | {base_oot['roc_auc']:<20.4f} | {lr_oot['roc_auc']:<20.4f} | {xgb_oot['roc_auc']:<20.4f}")
+    print(f"{'PR-AUC':<25} | {base_oot['pr_auc']:<20.4f} | {lr_oot['pr_auc']:<20.4f} | {xgb_oot['pr_auc']:<20.4f}")
+    print(f"{'KS-Statistic (%)':<25} | {base_oot['ks_statistic']:<20.2f} | {lr_oot['ks_statistic']:<20.2f} | {xgb_oot['ks_statistic']:<20.2f}")
+    print(f"{'Gini':<25} | {base_oot['gini']:<20.4f} | {lr_oot['gini']:<20.4f} | {xgb_oot['gini']:<20.4f}")
+    print(f"{'Brier Score':<25} | {base_oot['brier_score']:<20.4f} | {lr_oot['brier_score']:<20.4f} | {xgb_oot['brier_score']:<20.4f}")
+    print(f"{'Precision':<25} | {base_oot['precision']:<20.4f} | {lr_oot['precision']:<20.4f} | {xgb_oot['precision']:<20.4f}")
+    print(f"{'Recall':<25} | {base_oot['recall']:<20.4f} | {lr_oot['recall']:<20.4f} | {xgb_oot['recall']:<20.4f}")
+    print(f"{'F1 Score':<25} | {base_oot['f1']:<20.4f} | {lr_oot['f1']:<20.4f} | {xgb_oot['f1']:<20.4f}")
+    print("=" * 92)
+
+    champ_sel = results["champion_selection"]
+    print(f"\nChampion Selection Decision: {champ_sel['decision']}")
+    print(f"Selected Champion: {results['champion_name']}")
+    print(f"Rationale: {champ_sel['rationale']}")
+    print(f"Experiment Directory: {results['experiment_dir']}")
+
+    return results
 
 
 if __name__ == "__main__":

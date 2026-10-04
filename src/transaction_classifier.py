@@ -11,7 +11,8 @@ Prefers UNKNOWN over unjustified classification.
 
 import re
 from dataclasses import dataclass
-from typing import Optional, Tuple, Dict, Any, List
+from typing import Optional
+
 import pandas as pd
 
 from src.real_data_contracts import (
@@ -101,7 +102,7 @@ def classify_transaction(
 ) -> ClassificationResult:
     """
     Deterministically classifies a single transaction with explicit rule auditability.
-    
+
     Priority Hierarchy:
     1. Reversals
     2. Refunds / Cashbacks

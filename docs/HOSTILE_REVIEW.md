@@ -50,7 +50,7 @@ Every challenge is addressed with:
 
 ### Challenge 6: "Your synthetic training dataset contains only 8,000 records. How do you prove that your model hasn't simply overfitted to synthetic noise?"
 - **Direct Technical Defense**:  
-  The model architecture (`src/train_model.py`) is restricted to an L2-regularized linear model ($C=1.0$). Cross-validation demonstrates minimal divergence between 5-fold training AUC ($0.758 \pm 0.006$) and held-out test AUC ($0.755$). Because the model is strictly linear without high-order polynomial or interaction terms, it cannot memorize individual synthetic borrower records.
+  The model architecture (`src/train_model.py`) is restricted to an L2-regularized linear model ($C=1.0$). [HISTORICAL NOTE: Earlier prototype documentation quoted a test AUC of 0.755 / KS 38.8%; the current frozen reproducible baseline in `models/credit_model.pkl` achieves ROC-AUC 0.6240 and KS 21.08% on `synthetic_borrowers.csv`]. Because the model is strictly linear without high-order polynomial or interaction terms, it cannot memorize individual synthetic borrower records.
 - **Honest Regulatory Admission**:  
   While the model has not overfitted in the mathematical sense, it has completely fit the synthetic generator's specific structural assumptions (`data/generate_synthetic_data.py`). Any structural relationship omitted by the generator (e.g., non-linear debt traps) is invisible to the model.
 

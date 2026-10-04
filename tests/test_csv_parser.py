@@ -5,27 +5,22 @@ Path: tests/test_csv_parser.py
 Tests all 15 mandated fixtures and verification requirements from Part 4 specification.
 """
 
-import io
 import datetime
-import pytest
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+import pytest
 
 from src.real_data_contracts import (
     CANONICAL_COLUMNS,
-    ParsedStatement,
-    TransactionType,
-    NormalizedCategory,
-    SourceType,
-    UnsupportedSchemaError,
-    AmbiguousColumnError,
-    AmbiguousDateError,
     EmptyStatementError,
-    FileTypeError,
-    InvalidDataError,
+    NormalizedCategory,
+    ParsedStatement,
+    SourceType,
+    TransactionType,
+    UnsupportedSchemaError,
 )
-from src.real_data_parser import parse_csv_statement, parse_statement
-
+from src.real_data_parser import parse_csv_statement
 
 # -----------------------------------------------------------------------------
 # FIXTURE GENERATORS & RAW STRINGS
@@ -126,7 +121,7 @@ def test_clean_upi_csv():
     assert res.rows_parsed == 5
     assert res.rows_rejected == 0
     assert list(res.transactions.columns) == CANONICAL_COLUMNS
-    
+
     # Check specific row attributes
     swiggy_row = res.transactions[res.transactions["counterparty"].str.contains("Swiggy")].iloc[0]
     assert swiggy_row["amount"] == 450.0
@@ -139,7 +134,7 @@ def test_clean_bank_csv_with_dr_cr_split():
     res = parse_csv_statement(CLEAN_BANK_CSV.encode("utf-8"))
     assert res.source_type == SourceType.CSV_BANK.value
     assert res.rows_parsed == 4
-    
+
     # Verify withdrawal row
     bescom_row = res.transactions[res.transactions["counterparty"].str.contains("BESCOM")].iloc[0]
     assert bescom_row["amount"] == 1450.0
@@ -160,7 +155,7 @@ def test_alternate_header_aliases():
     assert res.columns_detected["date"] == "Timestamp"
     assert res.columns_detected["amount"] == "Txn Val"
     assert res.columns_detected["transaction_type"] == "Dr/Cr"
-    
+
     wage_row = res.transactions[res.transactions["counterparty"].str.contains("Wage")].iloc[0]
     assert wage_row["amount"] == 32000.0
     assert wage_row["transaction_type"] == TransactionType.CREDIT.value
@@ -266,20 +261,20 @@ def test_large_synthetic_csv_performance():
     amounts = np.random.uniform(50.0, 5000.0, size=n_rows).round(2)
     types = ["Debit" if i % 3 != 0 else "Credit" for i in range(n_rows)]
     narrations = ["UPI-TEST-MERCHANT" if i % 2 == 0 else "SWIGGY-BANGALORE" for i in range(n_rows)]
-    
+
     df = pd.DataFrame({
         "Date": [d.strftime("%Y-%m-%d") for d in dates],
         "Amount": amounts,
         "Type": types,
         "Narration": narrations
     })
-    
+
     csv_bytes = df.to_csv(index=False).encode("utf-8")
-    
+
     start_time = datetime.datetime.now()
     res = parse_csv_statement(csv_bytes)
     duration = (datetime.datetime.now() - start_time).total_seconds()
-    
+
     assert res.rows_parsed == n_rows
     assert duration < 5.0, f"Parsing 5,000 rows took {duration:.2f}s, expected < 5s."
 

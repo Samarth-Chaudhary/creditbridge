@@ -3,17 +3,23 @@ CreditBridge - Alternative Credit Scoring Engine
 Stage 2: Score-to-Tier Mapping & Scoring Utilities
 Path: src/scoring_utils.py
 
-Converts raw default probabilities from ML models into familiar 300-900 CIBIL-style
-credit scores using standard financial log-odds scaling (PDO methodology). Maps
-scores to actionable risk underwriting tiers.
+Converts calibrated default probabilities into a presentation-layer 300-900
+CreditBridge Risk Score using financial log-odds scaling (PDO methodology).
+Maps scores to actionable risk underwriting tiers.
+
+CRITICAL REGULATORY NOTICE:
+The 300-900 score is strictly a presentation layer called 'CreditBridge Risk Score'.
+It is NOT a CIBIL score, does NOT imply equivalence to any credit bureau score,
+and is NOT approved for autonomous credit decisioning.
 """
 
 import os
 import sys
+from typing import Any, Dict, Optional, Tuple, Union
+
 import joblib
 import numpy as np
 import pandas as pd
-from typing import Tuple, Union, Dict, Any, Optional
 
 # Ensure project root is on sys.path for unpickling custom pipeline objects
 src_dir = os.path.dirname(os.path.abspath(__file__))
@@ -23,13 +29,12 @@ if project_root not in sys.path:
 
 
 # -----------------------------------------------------------------------------
-# CIBIL-STYLE CREDIT SCORING FORMULATION (INTERVIEW TALKING POINTS)
+# CREDITBRIDGE RISK SCORE FORMULATION
 # -----------------------------------------------------------------------------
-# In credit risk management (Basel II / FICO / CIBIL standards), raw default
-# probabilities are mapped to three-digit credit scores via a logarithmic odds
-# transformation (PDO - Points to Double Odds):
+# Default probabilities (PD) are mapped to a 300-900 presentation score
+# via logarithmic odds transformation (PDO - Points to Double Odds):
 #
-#   odds = (1 - P(default)) / P(default) = P(good) / P(bad)
+#   odds = (1 - PD) / PD = P(non-default) / P(default)
 #   log_odds = ln(odds)
 #   Score = Offset + (Factor * log_odds)
 #
@@ -41,7 +46,7 @@ if project_root not in sys.path:
 # - P(default) = 7-15%  -> Score ~ 660-740 (Moderate Risk)
 # - P(default) = 20-35% -> Score ~ 550-640 (High Risk — Manual Review)
 # - P(default) > 40%    -> Score < 550     (Very High Risk)
-# - Bounded strictly within the classic Indian bureau range [300, 900].
+# - Clamped strictly to [300, 900].
 # -----------------------------------------------------------------------------
 
 SCORE_OFFSET = 490.0
@@ -53,8 +58,8 @@ POPULATION_DEFAULT_RATE = 0.14  # Baseline prior in Indian thin-file segment
 
 def probability_to_credit_score(prob_default: Union[float, np.ndarray]) -> Union[int, np.ndarray]:
     """
-    Transforms calibrated default probability into a 300-900 CIBIL-style credit score.
-    
+    Transforms calibrated default probability into a 300-900 presentation-layer CreditBridge Risk Score.
+
     Formula:
         odds = (1 - p) / p   (Good odds: non-default to default)
         score = Offset + Factor * ln(odds)
@@ -64,7 +69,7 @@ def probability_to_credit_score(prob_default: Union[float, np.ndarray]) -> Union
     odds = (1.0 - p) / p
     log_odds = np.log(odds)
     score = SCORE_OFFSET + (SCORE_FACTOR * log_odds)
-    
+
     clamped_score = np.clip(np.round(score), MIN_SCORE, MAX_SCORE).astype(int)
     if np.ndim(prob_default) == 0:
         return int(clamped_score.item())
@@ -74,7 +79,7 @@ def probability_to_credit_score(prob_default: Union[float, np.ndarray]) -> Union
 def score_to_tier(score: int) -> str:
     """
     Maps a 300-900 CreditBridge score into operational risk underwriting tiers.
-    
+
     Tiers:
     - 750 - 900: Low Risk (Instant digital approval)
     - 650 - 749: Moderate Risk (Standard terms, standard pricing)
@@ -103,7 +108,11 @@ def load_model_bundle(model_path: Optional[str] = None) -> Dict[str, Any]:
             f"Model file not found at: {model_path}. "
             "Please run `python src/train_model.py` first to train and persist the model."
         )
-    bundle = joblib.load(model_path)
+
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        bundle = joblib.load(model_path)
 
     # Ensure backward compatibility across scikit-learn versions for LogisticRegression estimator
     model = bundle.get("model")
@@ -119,14 +128,14 @@ def score_borrower(borrower_data: Union[pd.Series, pd.DataFrame, Dict[str, Any]]
     """
     End-to-end helper for scoring a single borrower or applicant record.
     Chains: Raw Input -> Feature Transformation -> Model Inference -> Score Conversion -> Tier Lookup.
-    
+
     Parameters:
     -----------
     borrower_data : pd.Series, single-row pd.DataFrame, or dict
         Raw applicant features with identical schema to synthetic_borrowers.csv.
     model_bundle : Optional[dict]
         Pre-loaded model artifact bundle to avoid reloading on successive calls.
-        
+
     Returns:
     --------
     score : int

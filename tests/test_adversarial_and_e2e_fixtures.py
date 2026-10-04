@@ -7,28 +7,23 @@ Tests the complete Real Data backend pipeline across 7 sanitized fixtures,
 20+ adversarial edge cases, property-based invariants, and failure isolation boundaries.
 """
 
-import io
-import os
 from pathlib import Path
-import pytest
-import pandas as pd
-import numpy as np
 
+import numpy as np
+import pytest
+
+from src.privacy_security import validate_upload_security
 from src.real_data_contracts import (
-    ManualInputContract,
+    CANONICAL_COLUMNS,
     EmptyStatementError,
     FileTypeError,
+    ManualInputContract,
     OversizedFileError,
     PathTraversalError,
     UnsupportedSchemaError,
-    InvalidDataError,
-    TransactionType,
-    ProvenanceState,
-    CANONICAL_COLUMNS,
 )
 from src.real_data_parser import parse_csv_statement
 from src.real_data_scoring import assess_statement_end_to_end
-from src.privacy_security import validate_upload_security, create_audit_manifest
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 

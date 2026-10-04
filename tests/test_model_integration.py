@@ -15,55 +15,43 @@ Verifies Part 7 requirements:
 10. End-to-end orchestration and result serialization.
 """
 
-import os
 import json
-import pytest
+import os
+
 import numpy as np
 import pandas as pd
+import pytest
 
+from src.explain import (
+    explain_borrower_record,
+)
 from src.real_data_contracts import (
-    RAW_BORROWER_COLUMNS,
-    ALLOWED_OCCUPATIONS,
-    ALLOWED_CITY_TIERS,
     UNAVAILABLE_MODEL_COLUMNS,
     AssessmentQualityStatus,
     ManualInputContract,
-    RealBorrowerPayload,
-    RealDataQualityReport,
-    RealDataAssessmentResult,
     MissingRequiredModelFeatureError,
     ModelSchemaMismatchError,
+    RealDataAssessmentResult,
     UnknownCategoryError,
-    PreprocessingFailureError,
-    PredictionFailureError,
-    ScoreTransformationFailureError,
-    ExplanationFailureError,
 )
-from src.scoring_utils import (
-    SCORE_OFFSET,
-    SCORE_FACTOR,
-    MIN_SCORE,
-    MAX_SCORE,
-    POPULATION_DEFAULT_RATE,
-    probability_to_credit_score,
-    score_to_tier,
-    load_model_bundle,
-    score_borrower,
-)
-from src.explain import (
-    explain_single_borrower,
-    explain_borrower_record,
-)
-from src.real_data_parser import parse_csv_statement
-from src.transaction_classifier import classify_transactions_df
 from src.real_data_features import build_real_borrower_payload
+from src.real_data_parser import parse_csv_statement
 from src.real_data_quality import build_data_quality_report
 from src.real_data_scoring import (
-    validate_model_input_schema,
-    score_real_borrower_payload,
     assess_statement_end_to_end,
+    score_real_borrower_payload,
+    validate_model_input_schema,
 )
-
+from src.scoring_utils import (
+    MAX_SCORE,
+    MIN_SCORE,
+    POPULATION_DEFAULT_RATE,
+    load_model_bundle,
+    probability_to_credit_score,
+    score_borrower,
+    score_to_tier,
+)
+from src.transaction_classifier import classify_transactions_df
 
 # -----------------------------------------------------------------------------
 # FIXTURES

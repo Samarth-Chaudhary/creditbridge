@@ -1,0 +1,52 @@
+{
+  "schema_version": "2.0.0-temporal",
+  "feature_count": 30,
+  "numeric_features": [
+    "age",
+    "monthly_income_estimate",
+    "electricity_bill_ontime_rate",
+    "electricity_bill_avg_delay_days",
+    "recharge_frequency_per_month",
+    "avg_recharge_amount",
+    "recharge_amount_volatility",
+    "days_since_last_recharge_lapse",
+    "monthly_upi_transaction_count",
+    "monthly_upi_inflow_avg",
+    "monthly_upi_outflow_avg",
+    "upi_inflow_volatility_coefficient",
+    "p2p_vs_merchant_txn_ratio",
+    "avg_weekly_gig_hours",
+    "gig_platform_rating",
+    "active_weeks_last_6_months",
+    "earnings_coefficient_of_variation",
+    "phone_number_tenure_months",
+    "app_account_age_months",
+    "income_stability_index",
+    "payment_reliability_score"
+  ],
+  "categorical_features": [
+    "occupation_type",
+    "city_tier"
+  ],
+  "derived_features": [
+    "income_stability_index",
+    "payment_reliability_score"
+  ],
+  "self_reported_features": [
+    "age",
+    "occupation_type",
+    "city_tier"
+  ],
+  "imputed_features": [
+    "electricity_bill_ontime_rate",
+    "electricity_bill_avg_delay_days",
+    "days_since_last_recharge_lapse",
+    "avg_weekly_gig_hours",
+    "gig_platform_rating",
+    "active_weeks_last_6_months",
+    "earnings_coefficient_of_variation",
+    "phone_number_tenure_months",
+    "app_account_age_months"
+  ],
+  "target": "defaulted"
+}

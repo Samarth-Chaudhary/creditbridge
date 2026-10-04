@@ -10,19 +10,17 @@ isolation verification for Real Data Mode.
 
 import datetime
 import io
-import os
 import re
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, Optional, Set, Union
 
 from src.real_data_contracts import (
     FileTypeError,
     OversizedFileError,
     PathTraversalError,
     SecurityViolationError,
-    CreditBridgeError,
 )
 
 # -----------------------------------------------------------------------------
@@ -72,7 +70,7 @@ def validate_upload_security(
     - File extension validation (.csv, .txt)
     - Maximum file size enforcement (10 MB)
     - Executable and binary magic byte detection
-    
+
     Raises:
     -------
     PathTraversalError:
@@ -96,7 +94,7 @@ def validate_upload_security(
         # Null-byte injection check
         if "\x00" in path_to_inspect:
             raise PathTraversalError("Null byte injection detected in filename.")
-        
+
         # Path traversal check
         normalized_str = path_to_inspect.replace("\\", "/")
         parts = normalized_str.split("/")
@@ -109,7 +107,7 @@ def validate_upload_security(
         ext = Path(path_to_inspect).suffix.lower()
         if ext and ext not in ALLOWED_EXTENSIONS:
             raise FileTypeError(
-                f"Unsupported file extension '{ext}'. Allowed extensions: {sorted(list(ALLOWED_EXTENSIONS))}"
+                f"Unsupported file extension '{ext}'. Allowed extensions: {sorted(ALLOWED_EXTENSIONS)}"
             )
 
     # B. File Size Enforcement
@@ -264,7 +262,7 @@ def create_audit_manifest(
     """
     sid = session_id or f"sess_{uuid.uuid4().hex[:12]}"
     now_utc = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    
+
     # Metadata extracted safely without raw rows
     source_type = "unknown"
     rows_parsed = 0

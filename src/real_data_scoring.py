@@ -4,15 +4,15 @@ Real Data Mode: Model Integration & Scoring Bridge
 Path: src/real_data_scoring.py
 
 Connects real statement payloads from Parts 4-6 into the existing fitted model
-infrastructure (FeaturePipeline, LogisticRegression classifier, CIBIL-style log-odds
+infrastructure (FeaturePipeline, LogisticRegression classifier, CreditBridge Risk Score log-odds
 transformation, risk tier mapping, and SHAP explainability) without altering the
 trained model or feature-engineering pipeline.
 """
 
 import os
 import sys
-from typing import Dict, Any, List, Optional, Union
-import numpy as np
+from typing import Any, Dict, Optional, Union
+
 import pandas as pd
 
 # Ensure project root is accessible
@@ -21,36 +21,34 @@ project_root = os.path.abspath(os.path.join(current_dir, ".."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
+from src.explain import explain_borrower_record
 from src.real_data_contracts import (
-    RAW_BORROWER_COLUMNS,
-    ALLOWED_OCCUPATIONS,
     ALLOWED_CITY_TIERS,
-    UNAVAILABLE_MODEL_COLUMNS,
+    ALLOWED_OCCUPATIONS,
+    RAW_BORROWER_COLUMNS,
     AssessmentQualityStatus,
-    RealBorrowerPayload,
-    RealDataQualityReport,
-    RealDataAssessmentResult,
+    ExplanationFailureError,
     ManualInputContract,
     MissingRequiredModelFeatureError,
     ModelSchemaMismatchError,
-    UnknownCategoryError,
-    PreprocessingFailureError,
     PredictionFailureError,
+    PreprocessingFailureError,
+    RealBorrowerPayload,
+    RealDataAssessmentResult,
+    RealDataQualityReport,
     ScoreTransformationFailureError,
-    ExplanationFailureError,
+    UnknownCategoryError,
 )
+from src.real_data_features import build_real_borrower_payload
+from src.real_data_parser import parse_csv_statement
+from src.real_data_quality import build_data_quality_report
 from src.scoring_utils import (
     POPULATION_DEFAULT_RATE,
+    load_model_bundle,
     probability_to_credit_score,
     score_to_tier,
-    load_model_bundle,
 )
-from src.explain import explain_borrower_record
-from src.real_data_parser import parse_csv_statement
 from src.transaction_classifier import classify_transactions_df
-from src.real_data_features import build_real_borrower_payload
-from src.real_data_quality import build_data_quality_report
-
 
 # -----------------------------------------------------------------------------
 # 1. EXPLICIT PRE-INFERENCE VALIDATION GATE
@@ -164,7 +162,7 @@ def score_real_borrower_payload(
 
     Safely feeds real-data features into the existing fitted model infrastructure:
     RealBorrowerPayload -> Schema Validation Gate -> FeaturePipeline ->
-    Fitted Model -> Calibration -> CIBIL Score Transformation -> Risk Tier ->
+    Fitted Model -> Calibration -> CreditBridge Risk Score Transformation -> Risk Tier ->
     SHAP Attribution -> RealDataAssessmentResult.
 
     Parameters:

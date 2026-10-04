@@ -1,0 +1,56 @@
+name: CreditBridge Phase 3 CI/CD & Governance Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  governance-and-tests:
+    name: Lint, Security, Regression & Governance Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock
+
+      - name: Static Type Checking & Code Quality (Pyright)
+        run: |
+          npx pyright
+
+      - name: "Step 1: Data Contract & Ingestion Tests"
+        run: |
+          pytest -v tests/test_data_quality.py tests/test_csv_parser.py
+
+      - name: "Step 2: Security & Privacy Penetration Tests"
+        run: |
+          pytest -v tests/test_privacy_security.py
+
+      - name: "Step 3: Model Baseline Regression Tests"
+        run: |
+          pytest -v tests/test_synthetic_baseline_regression.py tests/test_model_integration.py
+
+      - name: "Step 4: Phase 1 Scientific Reconstruction Tests"
+        run: |
+          pytest -v tests/test_phase1_scientific_reconstruction.py
+
+      - name: "Step 5: Phase 2 Fairness, Drift & Governance Tests"
+        run: |
+          pytest -v tests/test_phase2_governance.py
+
+      - name: "Step 6: Smoke Model Training & Evaluation Run"
+        run: |
+          python src/train_model.py
+          pytest -v tests/test_dashboard_smoke.py

@@ -243,14 +243,14 @@ Primary failure modes include ambiguous date formats (`05/06/2025`), merged narr
 
 ---
 
-### Q18: Why can't you claim that your AUC of 0.755 and KS of 38.8% represent real-world credit performance?
+### Q18: Why can't you claim that legacy AUC of 0.755 or current baseline AUC of 0.624 represent real-world credit performance?
 **Crisp Spoken Answer:**  
-Those performance metrics were evaluated entirely on a held-out synthetic test set generated from mathematical assumptions. Real-world credit risk includes unmodeled macro shocks, strategic defaults, and fraud that synthetic distributions cannot replicate. Claiming real-world readiness without empirical repayment validation would be a serious model governance violation.
+Those performance metrics were evaluated entirely on synthetic test sets generated from mathematical assumptions. Earlier prototype documentation cited a historical run of 0.755 AUC / 38.8% KS, whereas the current reproducible baseline artifact (`models/credit_model.pkl`) achieves 0.6240 ROC-AUC and 21.08% KS on `synthetic_borrowers.csv`. Real-world credit risk includes unmodeled macroeconomic shocks, strategic defaults, and fraud that synthetic distributions cannot replicate. Claiming real-world readiness without empirical repayment validation would be a serious model governance violation.
 
 **Deep Technical Explanation:**  
-- **Documentation Reference**: `docs/MODEL_CARD.md`, `README.md`.
+- **Documentation Reference**: `docs/MODEL_CARD.md`, `README.md`, `BASELINE_REPORT.md`.
 - Synthetic data generator `data/generate_synthetic_data.py` created ground truth default labels based on a logistic link function of engineered proxies.
-- A model trained on that data will naturally achieve high discrimination ($\text{AUC} = 0.755, \text{KS} = 38.8\%$) because the model's functional form mirrors the generator's equations.
+- A model trained on that data reflects the generator's specific assumptions. The historical run achieved $\text{AUC} = 0.755, \text{KS} = 38.8\%$, while the current verified, reproducible baseline produces $\text{AUC} = 0.6240, \text{KS} = 21.08\%$.
 - In real-world micro-lending, true label assignment is subject to behavioral unpredictability, health emergencies, and lender collection efficacy. The current model serves as a validated architectural prototype, not a commercially validated scorecard.
 
 ---

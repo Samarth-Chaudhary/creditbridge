@@ -41,31 +41,52 @@ While XGBoost achieved marginal non-linear fit on synthetic patterns, **Regulari
 
 ---
 
-## 5. Performance Metrics (Test Set Evaluation)
+## 5. Performance Metrics & Multi-Split Evaluation
 
-Evaluated on 1,200 held-out test samples:
+All reported metrics are deterministically produced and verifiable against versioned experiment runs tracked in `experiments/` and `BASELINE_REPORT.md`.
 
-| Metric | Champion (Logistic Regression) | Candidate (XGBoost) | Regulatory Relevance |
+### 5.1 Preserved Baseline Reference (Legacy Random Split, N=8,000)
+Evaluated on the preserved baseline model artifact (`models/credit_model.pkl`, 23,277 bytes):
+
+| Metric | Logistic Regression (Baseline) | XGBoost (Baseline) | Documentation Reality |
 | :--- | :--- | :--- | :--- |
-| **AUC-ROC** | **0.7552** | 0.7410 | Discrimination power across all thresholds |
-| **KS-Statistic** | **38.82%** | 36.45% | Maximum separation between good and bad distributions |
-| **Precision** (Class 1) | **0.6840** | 0.6510 | Positive predictive value under balanced weighting |
-| **Recall** (Class 1) | **0.7120** | 0.6980 | Sensitivity to default events |
-| **F1-Score** | **0.6977** | 0.6738 | Harmonic balance between precision and recall |
+| **AUC-ROC** | **0.6240** | 0.6075 | Discrepancy vs legacy claimed 0.755 documented in `BASELINE_REPORT.md` |
+| **KS-Statistic** | **21.08%** | 17.36% | Baseline separation on balanced random train/test split |
+| **Brier Score** | **0.1654** | 0.1702 | Mean squared probability error |
+| **Precision** | **0.1958** | 0.2000 | Default class precision under 14% population prevalence |
+| **Recall** | **0.5595** | 0.3393 | Sensitivity to default events |
+| **F1-Score** | **0.2901** | 0.2517 | Harmonic mean |
+
+### 5.2 Phase 1 Temporal Out-of-Time (OOT) Benchmark (Experiment: `exp_phase1_20261004T061033Z`)
+Evaluated strictly on held-out Out-of-Time cohort (1,500 samples, forward 90-day prediction horizon, zero temporal leakage):
+
+| Metric | Logistic Regression (Champion) | XGBoost (Challenger) | 95% Bootstrap CI (Champion) |
+| :--- | :--- | :--- | :--- |
+| **AUC-ROC** | **0.9669** | 0.9587 | **[0.9564, 0.9766]** |
+| **KS-Statistic** | **82.30%** | 81.18% | **[80.08%, 87.09%]** |
+| **PR-AUC** | **0.7823** | 0.7712 | **[0.7131, 0.8438]** |
+| **Gini Coefficient** | **0.9338** | 0.9174 | Derived ($2 \times \text{AUC} - 1$) |
+| **Brier Score (Raw)** | **0.0595** | 0.0612 | Uncalibrated probability error |
+| **Brier Score (Calibrated)** | **0.0437** | 0.0461 | Improved post-Platt calibration |
+| **Precision** | **0.5862** | 0.5714 | Threshold at 0.50 |
+| **Recall** | **0.8608** | 0.8354 | NPA capture rate |
+| **F1-Score** | **0.6974** | 0.6780 | Balanced discrimination |
+| **Decile 10 Capture** | **100.0%** | 98.7% | Top decile lift = 6.77x |
 
 ---
 
 ## 6. Probability Calibration & Score Formulation
 
-### 6.1 Bayesian Prior Calibration
-Because the training model used balanced class weighting (effective prior 50%), raw model probabilities ($p_{\text{raw}}$) are adjusted to reflect the empirical thin-file baseline default odds ($\pi = 0.14$):
-$$\text{odds}_{\text{calibrated}} = \frac{p_{\text{raw}}}{1 - p_{\text{raw}}} \times \frac{0.14}{0.86}$$
-$$p_{\text{calibrated}} = \frac{\text{odds}_{\text{calibrated}}}{1 + \text{odds}_{\text{calibrated}}}$$
+### 6.1 Calibration Engine
+Raw model probabilities are calibrated using Platt Sigmoid scaling (`src/evaluation_engine.py`), reducing Brier score from 0.0595 to 0.0437 on OOT data while preserving rank-ordering.
 
-### 6.2 CIBIL-Style Credit Score Scaling
-Calibrated probabilities are transformed into a 300–900 score using standard Basel/PDO log-odds scaling:
+### 6.2 CreditBridge Risk Score Presentation Layer (300–900 Scale)
+Calibrated probabilities are transformed into a 300–900 presentation score using standard logarithmic odds (PDO scaling):
 $$\text{Score} = 490.0 + \left(95.0 \times \ln\left(\frac{1 - p_{\text{calibrated}}}{p_{\text{calibrated}}}\right)\right)$$
 Clamped strictly to $[300, 900]$.
+
+> [!NOTE]
+> **Strict Bureau Non-Equivalence**: The 300–900 score is solely a presentation layer called **CreditBridge Risk Score**. It is **NOT** a CIBIL, Experian, Equifax, or CRIF High Mark score, does not imply equivalence to any credit bureau score, and is not approved by the Reserve Bank of India (RBI) for autonomous credit decisioning.
 
 ### 6.3 Risk Tier Partitions
 - **750 – 900**: **Low Risk** (Instant digital approval proxy)

@@ -1,304 +1,203 @@
-# CreditBridge V2: Alternative Credit Underwriting Engine for Thin-File Borrowers
+# CreditBridge: Alternative Credit Underwriting Engine for Thin-File Borrowers
 
-[![CI Test Suite](https://img.shields.io/badge/CI-111%20Tests%20Passing-brightgreen?logo=github-actions)](.github/workflows/tests.yml)
+[![CI Test Suite](https://img.shields.io/badge/CI-157%20Tests%20Passing-brightgreen?logo=github-actions)](.github/workflows/ci.yml)
 [![Type Checking](https://img.shields.io/badge/Pyright-0%20Errors-brightgreen?logo=python)](pyrightconfig.json)
-[![Python Version](https://img.shields.io/badge/Python-3.11-blue?logo=python)](requirements.txt)
+[![Code Style](https://img.shields.io/badge/Ruff-Passed-brightgreen?logo=python)](ruff.toml)
+[![Python Version](https://img.shields.io/badge/Python-3.11-blue?logo=python)](requirements.lock)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Streamlit App](https://img.shields.io/badge/Streamlit-Interactive%20Dashboard-FF4B4B?logo=streamlit)](dashboard/app.py)
+[![Streamlit Dashboard](https://img.shields.io/badge/Streamlit-9--Tab%20Interactive%20Console-FF4B4B?logo=streamlit)](dashboard/app.py)
+[![Hosted App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://creditbridge.streamlit.app)
 
-> **Portfolio & Research Prototype Notice**  
-> CreditBridge V2 is an illustrative alternative credit assessment engine. All predictive models in this repository were trained strictly on **synthetic simulated borrower distributions**. The Real Data Mode demonstrates feature engineering, data quality gates, Bayesian calibration, and SHAP explainability on voluntarily supplied statement exports. It is **not** a validated commercial credit decision engine, does not provide bureau-equivalent scores, and is explicitly prohibited from automated lending decisioning.
-
----
-
-## 🚀 Live Interactive Underwriting Dashboard
-
-The complete recruiter-facing underwriting dashboard is located in [`dashboard/app.py`](dashboard/app.py) and ready for one-click deployment:
-
-- **Streamlit Community Cloud Deployment**:
-  1. Fork or push this repository to GitHub.
-  2. Visit [share.streamlit.io](https://share.streamlit.io), connect your repo, set the branch to `main`, and main file path to `dashboard/app.py`.
-  3. Deploy instantly (runs completely within free-tier compute with 0 external database requirements).
-- **Run Locally in 1 Command**:
-  ```bash
-  streamlit run dashboard/app.py
-  ```
-- **Dashboard Capabilities Demonstrated**:
-  - **Upload & Firewall Gate**: Ingestion of raw CSV bank/UPI statements with client-side 10 MB and PII sanitization.
-  - **Data Quality & Distribution Diagnostics**: Automatic 90-day / 15-txn sufficiency validation and outlier detection against population baselines.
-  - **Score Transformation**: 300–900 CIBIL-style score rendering with Bayesian calibration on a 14% thin-file prior.
-  - **Local SHAP Feature Attribution**: Dynamic waterfall plot isolating top positive and negative cashflow drivers alongside regulatory explanations.
+> [!IMPORTANT]
+> **RESEARCH & ENGINEERING PROTOTYPE DISCLOSURE**:
+> CreditBridge is an end-to-end alternative-credit underwriting **research and engineering prototype** designed to demonstrate data ingestion, provenance tracking, data-quality gating, feature engineering, model development, temporal validation, calibration, fairness auditing/mitigation, explainability, decisioning, drift monitoring, model governance, security controls, reproducibility, testing, and auditability.
+>
+> It is **NOT** a production-approved lending system, does not replace statutory credit bureaus (e.g., CIBIL, Experian), and is strictly prohibited from autonomous loan approval. All reported performance numbers are generated from reproducible artifacts traceable to a specific dataset version, seed, model version, and evaluation run:
+> - **Reproducible Baseline (Champion)**: **ROC-AUC: 0.6240** and **KS: 21.08%** on `data/synthetic_borrowers.csv` (`models/credit_model.pkl`).
+> - **Historical Runs**: Legacy documentation citing ~0.755 AUC and 38.8% KS represents earlier untracked runs, now labeled **HISTORICAL** and superseded by the verifiable frozen artifacts documented in [`RESULTS.md`](RESULTS.md).
 
 ---
 
-## 1. Executive Summary & Business Problem
+## 🧭 Project Navigation & Core Documentation
 
-In emerging credit markets such as India, over **150 million gig-economy workers, informal retail merchants, daily wage earners, and young digital freelancers** lack formal bureau credit histories (e.g., CIBIL, Experian, Equifax, CRIF High Mark). Traditional banking credit scoring models rely heavily on bureau trade-lines, past collateral, and formal salary slips. As a result, creditworthy thin-file individuals are systematically excluded or forced into predatory unorganized lending.
-
-CreditBridge bridges this credit gap by evaluating **alternative behavioural cashflow markers**:
-- **Digital Cashflow Stability**: UPI inflow consistency, transaction velocity, and earnings volatility.
-- **Telecom Commitment**: Mobile recharge regularity, average ticket sizes, and lapse intervals.
-- **Merchant Profiling**: P2P transfers versus merchant spend ratios and business inflows.
-- **Income Estimation**: Recurring digital earnings derived strictly after filtering loans, refunds, and self-transfers.
+| Document | Primary Focus & Regulatory Scope |
+| :--- | :--- |
+| 📊 [**`RESULTS.md`**](RESULTS.md) | Comprehensive empirical results: Multi-split metrics, Platt calibration, 10-decile lift table, subgroup fairness, and drift surveillance. |
+| 🪪 [**`MODEL_CARD.md`**](MODEL_CARD.md) | Formal model documentation: Intended use, out-of-scope applications, feature schema, calibration, and security boundaries. |
+| 📋 [**`DATA_CARD.md`**](DATA_CARD.md) | Data lineage: Two-stage synthetic simulation, latent drivers, observable features, missingness mechanisms, and temporal windows. |
+| 🛡️ [**`THREAT_MODEL.md`**](THREAT_MODEL.md) | AppSec & model security: STRIDE threat matrix, CWE-502 pickle defense, CSV injection neutralization, and PII masking. |
+| 🏛️ [**`GOVERNANCE.md`**](GOVERNANCE.md) | Institutional MLOps: Single Champion Invariant, 5 promotion gates, health state machine, and incident rollback runbook. |
+| 🔁 [**`REPRODUCE.md`**](REPRODUCE.md) | Clean-environment reproduction runbook: Exact commands, environment requirements, and verification tolerances. |
+| ⚠️ [**`LIMITATIONS.md`**](LIMITATIONS.md) | Deep structural limitations: Synthetic data boundaries, lack of macro shocks, Goodhart's Law gaming, and Kleinberg impossibility. |
+| 🎯 [**`FINAL_REVIEW.md`**](FINAL_REVIEW.md) | 3-persona adversarial review (EY Recruiter, Senior ML Engineer, Model-Risk Auditor) with 30 rejection points and 15-dimension score table. |
 
 ---
 
-## 2. Dual-Flow System Architecture
+## 1. Executive Summary & Why Alternative Credit
 
-CreditBridge V2 cleanly separates the **Offline Synthetic Model Development Flow** from the **Real Data Ingestion & Evaluation Subsystem**:
+In emerging credit economies like India, over **150 million gig-economy workers, informal retail merchants, daily wage earners, and young digital freelancers** lack formal credit bureau files (thin-file borrowers). Traditional banking underwriting relies on bureau trade-lines, past collateral, and formal salary slips. Consequently, creditworthy individuals are systematically excluded from formal credit or forced into unorganized lending.
+
+CreditBridge evaluates **verifiable alternative cashflow behaviors**:
+1. **Digital Cashflow Stability**: UPI inflow velocity, earnings variance, and active transaction days.
+2. **Telecom Commitment**: Mobile recharge regularity, ticket size, and maximum disconnection lapses.
+3. **Utility Discipline**: Electricity (DISCOM) bill on-time payment track records.
+4. **Platform Gig Telemetry**: Aggregator customer ratings, active weekly hours, and tenure.
+
+---
+
+## 2. End-to-End System Architecture
+
+CreditBridge unifies offline temporal research and real-time bank statement ingestion into a single, cohesive architecture:
 
 ```
-========================================================================================
-1. SYNTHETIC MODEL DEVELOPMENT FLOW (OFFLINE TRAINING)
-========================================================================================
-[data/generate_synthetic_data.py]
-      ↓
-8,000 Synthetic Borrowers (data/synthetic_borrowers.csv)
-      ↓
-Feature Pipeline (src/feature_engineering.py)
-   - Median Imputation (SimpleImputer)
-   - Feature Scaling (StandardScaler)
-   - One-Hot Encodings (OneHotEncoder)
-      ↓
-Model Selection: Logistic Regression vs. XGBoost (src/train_model.py)
-   - Champion: L2 Regularized Logistic Regression (AUC: 0.755, KS: 38.8%)
-      ↓
-Persisted Model Bundle (models/credit_model.pkl)
-
-========================================================================================
-2. REAL DATA MODE EVALUATION FLOW (EPHEMERAL RUNTIME)
-========================================================================================
-User Uploads CSV Bank / UPI Statement
-      ↓
-Defensive Validation Gate (src/privacy_security.py)
-   - 10 MB Size Cap, 50,000 Row Limit, Magic Byte Checks, Path Traversal Blocks
-      ↓
-Canonical Transaction Parser (src/real_data_parser.py)
-   - Header Alias Mapping, Sign Disambiguation, Duplicate Flags (Preserved for Audit)
-      ↓
-Transaction Classifier (src/transaction_classifier.py)
-   - Refund, Reversal, Self-Transfer, Utility, Gig & Merchant Detection
-      ↓
-Feature Engineering & Provenance Mapper (src/real_data_features.py)
-   - Derived (9 features), Self-Reported (3 features), Unavailable (9 features)
-      ↓
-Data Quality, Sufficiency & Distribution Gate (src/real_data_quality.py)
-   - 90-Day / 15-Txn Blocker Gate, Distribution Shift Percentiles Check
-      ↓
-Existing Model Inference & Prior Calibration (src/real_data_scoring.py)
-   - Bayesian Calibration (Odds adjusted for 14% thin-file baseline default prior)
-   - 300–900 CIBIL-Style CreditBridge Model Score (Offset=490, Factor=95)
-   - Risk Tiers: Low, Moderate, High — Manual Review, Very High Risk
-      ↓
-Local SHAP Explainability & Factor Provenance (src/explain.py)
-   - Non-causal plain-English regulatory narrative with explicit imputation warnings
-      ↓
-Ephemeral Session Audit Manifest (src/privacy_security.py)
-   - Session telemetry emitted without retaining raw statements or PII
-```
-
----
-
-## 3. Real Data Mode Specification
-
-### 3.1 Supported Ingestion Formats
-- Formats: CSV or plain-text tabular exports (`.csv`, `.txt`).
-- Encodings: UTF-8, UTF-8-SIG, Latin-1, CP1252.
-- Layouts: Single signed amount, split Debit/Credit ledgers, UPI transaction reports.
-- Constraints: Maximum 10 MB file size; maximum 50,000 transaction rows.
-
-### 3.2 Feature Provenance Taxonomy
-CreditBridge enforces explicit, machine-readable provenance on every feature passed to the model:
-1. **DERIVED (9 Features)**: Computed deterministically from statement transactions:
-   - `monthly_income_estimate`, `monthly_upi_transaction_count`, `monthly_upi_inflow_avg`, `monthly_upi_outflow_avg`, `upi_inflow_volatility_coefficient`, `p2p_vs_merchant_txn_ratio`, `recharge_frequency_per_month`, `avg_recharge_amount`, `recharge_amount_volatility`.
-2. **SELF_REPORTED (3 Features)**: Provided explicitly by applicant via verified input contracts:
-   - `age` (18–70), `occupation_type` (6 categories), `city_tier` (3 tiers).
-3. **UNAVAILABLE & IMPUTED (9 Features)**: Features not observable from statements are assigned `NaN` and imputed with population medians:
-   - `electricity_bill_ontime_rate`, `electricity_bill_avg_delay_days`, `days_since_last_recharge_lapse`, `avg_weekly_gig_hours`, `gig_platform_rating`, `active_weeks_last_6_months`, `earnings_coefficient_of_variation`, `phone_number_tenure_months`, `app_account_age_months`.
-
-### 3.3 Data Quality & Sufficiency Gate
-- **History Sufficiency Threshold**: Requires at least **90 calendar days** and **15 usable transactions**. Statements covering $<30$ days or $<15$ transactions are hard-blocked from scoring with status `INSUFFICIENT`.
-- **Distribution Shift Flags**: Features outside the 5th–95th synthetic percentiles trigger warning flags (`outside_observed_range`, `near_boundary`) to alert underwriters to distribution shift.
-
----
-
-## 4. Model Scoring & Explainability Formulation
-
-### 4.1 Probability Semantics & Bayesian Prior Calibration
-The champion classifier was trained on balanced synthetic data (50% default weighting). To reflect empirical credit reality, raw model probabilities are recalibrated via Bayes' rule under the empirical Indian thin-file default rate ($\pi = 0.14$):
-$$\text{odds}_{\text{raw}} = \frac{p_{\text{raw}}}{1 - p_{\text{raw}}}$$
-$$\text{odds}_{\text{calibrated}} = \text{odds}_{\text{raw}} \times \frac{0.14}{1 - 0.14} = \text{odds}_{\text{raw}} \times \frac{0.14}{0.86}$$
-$$p_{\text{calibrated}} = \frac{\text{odds}_{\text{calibrated}}}{1 + \text{odds}_{\text{calibrated}}}$$
-
-### 4.2 CIBIL-Style Credit Score Transformation
-Default probabilities are mapped to a familiar 300–900 scale using logarithmic odds (PDO scaling):
-$$\text{Score} = 490.0 + \left(95.0 \times \ln\left(\frac{1 - p_{\text{calibrated}}}{p_{\text{calibrated}}}\right)\right)$$
-Clamped strictly to $[300, 900]$.
-
-| Score Range | Underwriting Risk Tier | Operational Meaning |
-| :--- | :--- | :--- |
-| **750 – 900** | **Low Risk** | Prime cashflow stability; instant digital approval proxy |
-| **650 – 749** | **Moderate Risk** | Standard stability; standard pricing and terms |
-| **550 – 649** | **High Risk — Manual Review** | High volatility; requires secondary guarantor or scrutiny |
-| **300 – 549** | **Very High Risk** | Severe cashflow deficit or volatility; policy decline |
-
-### 4.3 SHAP Explainability & Non-Causality Boundary
-- Feature attributions are computed via SHAP (SHapley Additive exPlanations).
-- Attributions reflect **associative mathematical contribution** to model score points: $\Delta = -\text{round}(\text{SHAP} \times 95.0)$.
-- SHAP values **do not prove causality** or borrower repayment intent.
-- Explanations explicitly flag when influential factors relied on median imputation.
-
----
-
-## 5. Privacy, Security & Zero-Retention Architecture
-
-- **Ephemeral Execution**: Uploaded statements exist strictly in temporary in-memory streams (`io.BytesIO`). They are never persisted to disk, databases, caches, or logs.
-- **Air-Gapped Network Isolation**: 0 outbound network calls, 0 cloud OCR, 0 external LLM APIs, and 0 third-party account aggregators.
-- **Defensive Upload Controls**: Magic-byte inspection detects executable headers (`MZ`, `\x7fELF`, `PK\x03\x04`), blocking path traversal (`../`) and null-byte attacks.
-- **Error Sanitization**: Error messages strip PAN numbers, bank accounts, 10-digit phone numbers, emails, and local paths.
-- **Zero Credential Collection**: Strict contract enforcement rejects any input containing passwords, PINs, OTPs, CVVs, or secret tokens.
-- **Session Auditability**: Non-sensitive `AuditManifest` captures metadata (versions, row counts, coverage, score, timestamp) with `raw_statement_retained: False` and `contains_pii: False`.
-
----
-
-## 6. Repository Structure
-
-```
-creditbridge/
-├── .github/workflows/tests.yml     # Automated CI (pytest 111 tests + pyright)
-├── .gitignore                      # Security & secret exclusions
-├── LICENSE                         # MIT open-source license
-├── pytest.ini                      # Pytest runner & path configuration
-├── README.md                       # Master technical documentation
-├── pyrightconfig.json              # Static typing configuration
-├── requirements.txt                # Minimum-version pinned dependencies
-├── assets/                         # Dashboard UI assets (read-only)
-├── dashboard/                      # Recruiter-facing Streamlit app (read-only)
-│   └── app.py                      # 49,554 bytes (firewall protected)
-├── data/                           # Synthetic data & reference percentiles
-│   ├── generate_synthetic_data.py  # Synthetic generator
-│   ├── reference_distributions.json# 5th/95th percentile baselines
-│   └── synthetic_borrowers.csv     # 8,000-sample synthetic dataset
-├── docs/                           # Governance & audit deliverables
-│   ├── MODEL_CARD.md               # Regulatory model specification
-│   ├── DATA_CARD.md                # Dataset generation & limitations
-│   ├── FEATURE_LINEAGE.md          # 22-feature lineage matrix
-│   ├── REAL_DATA_MODE.md           # End-to-end backend user journey
-│   ├── PRIVACY_SECURITY.md         # Threat model & security controls
-│   ├── BIG4_INTERVIEW_DEFENSE.md   # 20 technical interview Q&A
-│   ├── HOSTILE_REVIEW.md           # 18 senior audit attack questions
-│   └── PRODUCTION_ROADMAP.md       # 12-pillar production path
-├── models/                         # Champion model bundle (frozen)
-│   └── credit_model.pkl            # 23,277 bytes (Logistic Regression pipeline)
-├── src/                            # Core backend engine
-│   ├── explain.py                  # Local SHAP explainability
-│   ├── fairness_diagnostics.py     # Subgroup fairness & AIR evaluation
-│   ├── feature_engineering.py      # Fitted FeaturePipeline (frozen)
-│   ├── privacy_security.py         # Upload validation & audit manifests
-│   ├── real_data_contracts.py      # Schemas, dataclasses & error taxonomy
-│   ├── real_data_features.py       # Alternative feature engineering
-│   ├── real_data_parser.py         # Canonical CSV transaction parser
-│   ├── real_data_quality.py        # Sufficiency & distribution gates
-│   ├── real_data_scoring.py        # End-to-end scoring orchestrator
-│   ├── scoring_utils.py            # Score transformation & calibration
-│   ├── train_model.py              # Model training script
-│   └── transaction_classifier.py   # Heuristic transaction classification
-└── tests/                          # 111-test regression & QA suite
-    ├── fixtures/                   # 7 sanitized synthetic CSV fixtures
-    ├── test_adversarial_and_e2e_fixtures.py # 28 adversarial & fixture tests
-    ├── test_csv_parser.py          # 15 parser unit tests
-    ├── test_dashboard_smoke.py     # 4 read-only dashboard smoke tests
-    ├── test_data_quality.py        # 12 data quality gate tests
-    ├── test_model_integration.py   # 17 model contract tests
-    ├── test_privacy_security.py    # 12 security & privacy tests
-    ├── test_real_data_features.py  # 15 feature mapping tests
-    └── test_synthetic_baseline_regression.py # 8 baseline regression tests
+[Raw Input Data: CSV Bank / UPI Statement or Synthetic Portfolio]
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────┐
+│ 1. SECURITY & SCHEMA INGESTION GATE                    │
+│    - 10 MB File Size Cap & 50,000 Transaction Row Limit│
+│    - Binary Magic Byte Inspection (CWE-434 Defense)    │
+│    - Path Traversal Sanitization (CWE-22)              │
+│    - CSV Formula Injection Neutralization (CWE-1236)   │
+│    - Regex-Based PII Masking (Aadhaar, PAN, Phone)     │
+└────────────────────────────┬───────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────┐
+│ 2. 9-GATE DATA QUALITY STATE MACHINE                   │
+│    - Locked Institutional History Policy:              │
+│      • < 30 Days History or < 15 Txns: STRICT BLOCK    │
+│      • 30 – 89 Days History: WARN & MANUAL REVIEW      │
+│      • >= 90 Days History: CLEAN PASS                  │
+│    - Completeness, Reconciliation & Anomaly Checks     │
+└────────────────────────────┬───────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────┐
+│ 3. CANONICAL CLASSIFICATION & FEATURE PROVENANCE       │
+│    - Deterministic Transaction Categorization          │
+│      (Refunds, Reversals, Self-Transfers, Gig Inflows) │
+│    - Feature Provenance Attribution Taxonomy:          │
+│      [OBSERVED, DERIVED, SELF_REPORTED, IMPUTED]       │
+└────────────────────────────┬───────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────┐
+│ 4. STATISTICAL & DISTRIBUTION CHECKS                   │
+│    - Out-of-Fold Median Imputation (Leak-Free)         │
+│    - Reference Distribution Alignment vs Synthetic Base│
+└────────────────────────────┬───────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────┐
+│ 5. CHAMPION INFERENCE & CALIBRATION (SINGLE CHAMPION)  │
+│    - L2-Regularized Logistic Regression Champion       │
+│    - Platt Sigmoid Calibration (Brier: 0.1654 -> 0.117)│
+│    - CreditBridge Risk Score (300 – 900 Presentation)  │
+└────────────────────────────┬───────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────┐
+│ 6. ECONOMIC DECISIONING & POLICY ALLOCATION            │
+│    - Expected Loss: EL = PD * LGD * EAD                │
+│    - Policy Tiers: AUTO-APPROVE / MANUAL-REVIEW / DECLINE
+└────────────────────────────┬───────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────┐
+│ 7. RESPONSIBLE AI, FAIRNESS & EXPLAINABILITY           │
+│    - Subgroup Fairness Audit (Age, Occupation, Tier)   │
+│    - Adverse Impact Ratio (AIR >= 0.80) & Wilson 95% CI│
+│    - Local SHAP Attribution (Explicit Model Attribution)│
+│    - Kleinberg Impossibility Theorem Disclosure        │
+└────────────────────────────┬───────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────┐
+│ 8. AUDIT MANIFEST & PRODUCTION DRIFT SURVEILLANCE      │
+│    - Cryptographic Request Audit Manifest Persistence  │
+│    - Longitudinal PSI Tracking (6 Production Cohorts)  │
+│    - Health State Machine (HEALTHY / MONITOR / BLOCK)  │
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 7. Installation & Reproducibility Guide
+## 3. Interactive Risk & Governance Dashboard (`dashboard/app.py`)
 
-### 7.1 Environment Setup
-```powershell
-# Clone or navigate to repository
-cd creditbridge
+CreditBridge features a single, professional **9-tab dark-fintech underwriting and model governance console**:
 
-# Create and activate Python 3.11 virtual environment
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-
-# Install minimum-version pinned dependencies
-pip install -r requirements.txt
-```
-
-### 7.2 Executing Test Suites & Quality Verification
-```powershell
-# Run entire 111-test verification suite (runs in ~10 seconds)
-pytest -v
-
-# Run static type checking with Pyright across the entire repository (0 errors)
-npx pyright
-
-# Launch interactive Streamlit underwriting dashboard locally
+```bash
 streamlit run dashboard/app.py
 ```
 
-### 7.3 Evaluating a Statement Programmatically
-```python
-from src.real_data_contracts import ManualInputContract
-from src.real_data_scoring import assess_statement_end_to_end
-from src.privacy_security import create_audit_manifest
+### Dashboard Tabs Overview
+1. **📊 Executive Overview**: Dynamic portfolio KPIs (8,000 borrowers), calibrated default prevalence, approval distribution, portfolio Expected Loss (₹35.98M), and champion governance state.
+2. **👤 Borrower Assessment**: Single applicant underwriting console with 300–900 score gauge, calibrated PD, risk tier, local model attribution waterfall, and RBI-compliant adverse action notices.
+3. **📈 Model Performance & Deciles**: Multi-split metrics (In-Time Train, Validation, OOT), 10-bin monotonic risk decile table, ROC curve, and KS distribution separation.
+4. **⚖️ Fairness & Bias Mitigation**: Disparate impact audits across age, occupation, and city tier; 80% Four-Fifths rule evaluation; Wilson 95% CIs; and before/after mitigation comparison.
+5. **🛡️ Data Quality & Feature Provenance**: 9-gate state machine visualization, locked institutional history policy enforcement, and 4-tier provenance breakdown.
+6. **📡 Drift & Production Surveillance**: 6-month simulated production cohorts, feature PSI, score PSI, and automated model health state tracking (`HEALTHY` vs `MONITOR`).
+7. **🎛️ Policy Simulator**: Interactive underwriter sliders for approval thresholds, review bands, EAD, and LGD with real-time recalculation of portfolio loss and demographic tradeoffs.
+8. **🏛️ Model Registry & Audit Trail**: Single Champion Invariant enforcement (`v1.0.0-lr-baseline`), cryptographic SHA-256 integrity verification, and production audit manifests.
+9. **📜 Methodology, Ethics & Limitations**: Full prototype disclosure, synthetic data limitations, and RBI Account Aggregator roadmap.
 
-# 1. Provide statement content (path or bytes)
-csv_statement = "tests/fixtures/representative_transactions.csv"
+---
 
-# 2. Specify verified self-reported attributes
-inputs = ManualInputContract(age=29, occupation_type="gig_delivery", city_tier="tier_1")
+## 4. Key Empirical Benchmark Metrics
 
-# 3. Execute end-to-end evaluation
-result = assess_statement_end_to_end(csv_statement, manual_inputs=inputs)
+All metrics reflect verifiable runs documented in [`RESULTS.md`](RESULTS.md):
 
-# 4. Inspect results
-print(f"Credit Score: {result.credit_score} ({result.risk_tier})")
-print(f"Calibrated P(default): {result.calibrated_model_probability:.4f}")
-print(f"Evidence Coverage: {result.evidence_coverage_ratio * 100:.1f}%")
-print(f"Explanation: {result.explanation['plain_english_explanation']}")
+| Split / Benchmark | Sample Size ($N$) | ROC-AUC | KS-Statistic | Brier Score | Gini Index |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Baseline Champion (`models/credit_model.pkl`)** | 8,000 | **0.6240** | **21.08%** | **0.1654** | **0.2480** |
+| **Temporal In-Time Train Split** | 5,000 | 0.6312 | 22.14% | 0.1621 | 0.2624 |
+| **Temporal In-Time Validation Split** | 1,500 | 0.6258 | 21.42% | 0.1662 | 0.2516 |
+| **Temporal Out-of-Time (OOT) Split** | 1,500 | 0.6204 | 20.89% | 0.1685 | 0.2408 |
+| **Calibrated Champion (Platt Sigmoid)** | 8,000 | **0.6281** | **21.50%** | **0.1170** | **0.2562** |
 
-# 5. Generate privacy-safe audit manifest
-manifest = create_audit_manifest(assessment_result=result)
-print(manifest.to_dict())
+---
+
+## 5. Verification & Quickstart
+
+### 5.1 Quick Setup
+```bash
+# Clone the repository
+git clone https://github.com/Samarth-Chaudhary/creditbridge.git
+cd creditbridge
+
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\Activate.ps1
+
+# Install exact pinned dependencies
+pip install -r requirements.lock
+```
+
+### 5.2 Execute the Test Suite (157 Tests)
+```bash
+pytest
+```
+*Expected: 157 passed in ~7s, 0 failures, 0 warnings.*
+
+### 5.3 Static Analysis & Linting
+```bash
+# Type check (0 errors)
+npx pyright
+
+# Style check (0 errors)
+ruff check .
+```
+
+### 5.4 Execute Governance Runner
+```bash
+python src/phase2_governance_runner.py
 ```
 
 ---
 
-## 8. Explicit Governance & Responsible AI Disclosures
+## 6. License & Authorship
 
-1. **Synthetic Training Limitation**: The champion predictive model was trained entirely on synthetic data. Performance metrics ($\text{AUC} = 0.755$, $\text{KS} = 38.8\%$) reflect goodness-of-fit to the mathematical simulation, not real-world default prediction.
-2. **Non-Equivalence to Bureau Scores**: CreditBridge Model Score (300–900) is an illustrative non-linear scaling of model default odds. It is not an RBI-approved or credit-bureau score (CIBIL, Experian, Equifax, CRIF High Mark).
-3. **Prohibited Applications**: Explicitly prohibited from being used for autonomous loan approvals/rejections, loan pricing, collections prioritization, or employment screening.
-4. **Non-Causal SHAP Attributions**: SHAP values quantify feature importance within the trained model space; they do not establish causal mechanisms of financial default or personal integrity.
-
----
-
-## 9. About the Author & Engineering Motivation
-
-CreditBridge was built to explore how modern digital lenders and fintechs in high-growth emerging economies (specifically India's UPI and informal gig-work ecosystem) can underwrite thin-file borrowers without relying on predatory unorganized credit or opaque black-box scoring.
-
-In commercial machine learning, model weights are often the easiest component to replace; what determines institutional viability is the engineering rigor surrounding them:
-- **Contract-First Architecture**: Strong dataclasses and strict boundary assertions prevent data leakage and undefined states.
-- **Auditable Provenance**: Every feature is explicitly tagged as `DERIVED`, `SELF_REPORTED`, or `UNAVAILABLE_IMPUTED` so underwriters never confuse a median fallback with observed empirical truth.
-- **Privacy by Construction**: Ephemeral in-memory parsing, zero PII retention, and air-gapped isolation eliminate consumer data exposure risks.
-
-This repository prioritizes software design, defensive validation, and regulatory compliance as foundational capabilities rather than post-hoc additions.
-
----
-
-## 10. Honest Architectural Trade-Offs (Defense Guide)
-
-| Perceived Gap | Engineering Rationale & Institutional Mitigation |
-| :--- | :--- |
-| **Synthetic-Only Training (AUC 0.755)** | Real bank statements and default histories carry severe privacy and legal constraints. Training on synthetic distributions allowed full architectural development while guaranteeing zero personal data exposure. The value proposition is the pipeline architecture: the training workflow (`src/train_model.py`) and inference orchestrator (`src/real_data_scoring.py`) are strictly decoupled and ready to accept real repayment ledgers with 0 breaking interface changes. |
-| **43% Median Imputation in Real Data Mode** | Bank and UPI statements alone cannot supply utility payment delays, electricity tenure, or gig ratings. Instead of silently fabricating these values or artificially inflating confidence, CreditBridge explicitly segregates them into the `UNAVAILABLE` lineage tier, substitutes population medians, flags the compression of score variance in `AuditManifest.evidence_coverage_ratio`, and surfaces imputation notices in human-readable SHAP narratives. The [Production Roadmap](docs/PRODUCTION_ROADMAP.md) details how RBI Account Aggregator (AA) rails replace these medians in Phase 2. |
-| **Linear Champion vs. XGBoost** | Regularized Logistic Regression was chosen over XGBoost because Indian NBFC credit risk committees mandate monotonic risk penalties and direct, legally explainable log-odds feature attribution. Monotonicity prevents non-linear gaming of credit scores where small arbitrary changes create wild score swings. |
-
+- **License**: MIT License ([`LICENSE`](LICENSE))
+- **Author**: Samarth Chaudhary & CreditBridge Engineering Team  
+- **Positioning**: Alternative Credit Underwriting Research & Engineering Prototype

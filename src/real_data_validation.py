@@ -8,19 +8,20 @@ to downstream model execution, preventing malformed or invalid records from ente
 the frozen FeaturePipeline.
 """
 
-from typing import Dict, Any, List
+from typing import Dict
+
 import numpy as np
 import pandas as pd
 
 from src.real_data_contracts import (
-    RAW_BORROWER_COLUMNS,
-    ALLOWED_OCCUPATIONS,
     ALLOWED_CITY_TIERS,
+    ALLOWED_OCCUPATIONS,
+    RAW_BORROWER_COLUMNS,
     UNAVAILABLE_MODEL_COLUMNS,
-    ManualInputContract,
-    ModelInputContractError,
-    ManualInputContractError,
     FeatureProvenanceRecord,
+    ManualInputContract,
+    ManualInputContractError,
+    ModelInputContractError,
 )
 
 
@@ -37,7 +38,7 @@ def validate_borrower_row(
 ) -> None:
     """
     Performs comprehensive schema and value verification on the model-facing borrower DataFrame.
-    
+
     Raises:
     -------
     ModelInputContractError:

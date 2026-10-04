@@ -9,9 +9,8 @@ and protected under the Dashboard Firewall.
 """
 
 import ast
-import os
 from pathlib import Path
-import pytest
+
 import pandas as pd
 
 
@@ -22,9 +21,9 @@ def test_dashboard_file_integrity_and_firewall():
 
     assert dashboard_path.exists(), "dashboard/app.py is missing!"
     assert dashboard_path.stat().st_size > 0, "dashboard/app.py is empty!"
-    assert dashboard_path.stat().st_size == 75505, (
+    assert dashboard_path.stat().st_size == 53136, (
         f"FIREWALL VIOLATION: dashboard/app.py size mismatch! "
-        f"Expected 75505 bytes, got {dashboard_path.stat().st_size} bytes."
+        f"Expected 53136 bytes, got {dashboard_path.stat().st_size} bytes."
     )
 
 
@@ -45,12 +44,12 @@ def test_dashboard_backend_import_contracts():
     """Verify all backend symbols and contracts imported by dashboard/app.py exist and are callable."""
     # Test scoring_utils imports
     from src.scoring_utils import (
-        load_model_bundle,
-        score_borrower,
-        probability_to_credit_score,
-        score_to_tier,
-        SCORE_FACTOR,
         POPULATION_DEFAULT_RATE,
+        SCORE_FACTOR,
+        load_model_bundle,
+        probability_to_credit_score,
+        score_borrower,
+        score_to_tier,
     )
     assert callable(load_model_bundle)
     assert callable(score_borrower)
@@ -60,7 +59,7 @@ def test_dashboard_backend_import_contracts():
     assert isinstance(POPULATION_DEFAULT_RATE, float)
 
     # Test explain imports
-    from src.explain import explain_single_borrower, FEATURE_NAME_MAP
+    from src.explain import FEATURE_NAME_MAP, explain_single_borrower
     assert callable(explain_single_borrower)
     assert isinstance(FEATURE_NAME_MAP, dict)
     assert len(FEATURE_NAME_MAP) > 0

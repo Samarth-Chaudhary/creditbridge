@@ -1,0 +1,182 @@
+{
+  "train": {
+    "roc_auc": 0.982,
+    "pr_auc": 0.8246,
+    "ks_statistic": 88.02,
+    "gini": 0.9641,
+    "brier_score": 0.0528,
+    "precision": 0.5902,
+    "recall": 0.9455,
+    "f1": 0.7267,
+    "confusion_matrix": [
+      [
+        4180,
+        325
+      ],
+      [
+        27,
+        468
+      ]
+    ],
+    "calibration_intercept": -2.039,
+    "calibration_slope": 0.9416,
+    "ci_95": null
+  },
+  "validation": {
+    "roc_auc": 0.9772,
+    "pr_auc": 0.8573,
+    "ks_statistic": 85.23,
+    "gini": 0.9544,
+    "brier_score": 0.0524,
+    "precision": 0.6229,
+    "recall": 0.8963,
+    "f1": 0.735,
+    "confusion_matrix": [
+      [
+        1247,
+        89
+      ],
+      [
+        17,
+        147
+      ]
+    ],
+    "calibration_intercept": -1.7222,
+    "calibration_slope": 1.0938,
+    "ci_95": null
+  },
+  "test": {
+    "roc_auc": 0.9802,
+    "pr_auc": 0.8972,
+    "ks_statistic": 86.26,
+    "gini": 0.9605,
+    "brier_score": 0.0565,
+    "precision": 0.6087,
+    "recall": 0.9333,
+    "f1": 0.7368,
+    "confusion_matrix": [
+      [
+        606,
+        54
+      ],
+      [
+        6,
+        84
+      ]
+    ],
+    "calibration_intercept": -1.9237,
+    "calibration_slope": 1.3356,
+    "ci_95": null
+  },
+  "oot": {
+    "roc_auc": 0.9669,
+    "pr_auc": 0.7823,
+    "ks_statistic": 82.3,
+    "gini": 0.9338,
+    "brier_score": 0.0595,
+    "precision": 0.5862,
+    "recall": 0.8608,
+    "f1": 0.6974,
+    "confusion_matrix": [
+      [
+        1246,
+        96
+      ],
+      [
+        22,
+        136
+      ]
+    ],
+    "calibration_intercept": -1.6095,
+    "calibration_slope": 0.8575,
+    "ci_95": {
+      "roc_auc_ci": [
+        0.9564,
+        0.9766
+      ],
+      "ks_statistic_ci": [
+        80.08,
+        87.09
+      ],
+      "pr_auc_ci": [
+        0.7131,
+        0.8438
+      ]
+    }
+  },
+  "champion_selection": {
+    "decision": "CHAMPION_SELECTED",
+    "champion_name": "Logistic Regression",
+    "rationale": "Selected Logistic Regression as champion under regulatory parsimony rule. XGBoost performance lead (+-0.0082 AUC) is within 0.03 tolerance, making linear monotonicity and exact log-odds regulatory attribution preferred for underwriting.",
+    "gates_evaluated": {
+      "Logistic Regression": {
+        "discrimination_gate": {
+          "passed": true,
+          "oot_auc": 0.9669,
+          "oot_ks": 82.3
+        },
+        "stability_gate": {
+          "passed": true,
+          "delta": 0.0103
+        },
+        "calibration_gate": {
+          "passed": true,
+          "slope": 0.7832
+        },
+        "fairness_gate": {
+          "passed": true,
+          "min_air": 0.3243
+        },
+        "explainability_gate": {
+          "passed": true
+        }
+      },
+      "XGBoost Classifier": {
+        "discrimination_gate": {
+          "passed": true,
+          "oot_auc": 0.9587,
+          "oot_ks": 81.86
+        },
+        "stability_gate": {
+          "passed": true,
+          "delta": 0.0101
+        },
+        "calibration_gate": {
+          "passed": true,
+          "slope": 0.8518
+        },
+        "fairness_gate": {
+          "passed": true,
+          "min_air": 0.3243
+        },
+        "explainability_gate": {
+          "passed": true
+        }
+      }
+    },
+    "failure_reasons": []
+  },
+  "economic_decisioning": {
+    "total_applicants": 1500,
+    "approval_count": 1189,
+    "approval_rate": 0.7927,
+    "review_count": 100,
+    "review_rate": 0.0667,
+    "decline_count": 211,
+    "decline_rate": 0.1407,
+    "total_portfolio_expected_loss": 2568644.98,
+    "approved_expected_loss": 163476.21,
+    "population_base_bad_rate": 0.1053,
+    "approved_cohort_bad_rate": 0.0093,
+    "declined_cohort_bad_rate": 0.6161,
+    "reviewed_cohort_bad_rate": 0.17,
+    "bad_rate_reduction_pct": 91.22,
+    "policy_config": {
+      "auto_approve_max_pd": 0.08,
+      "manual_review_max_pd": 0.2,
+      "min_score_cutoff": 650,
+      "default_lgd": 0.65,
+      "default_ead": 25000.0
+    }
+  }
+}

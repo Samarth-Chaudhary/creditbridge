@@ -8,35 +8,32 @@ zero disk persistence of personal statements, error message sanitization,
 network isolation, audit manifest generation, and subgroup fairness governance.
 """
 
-import io
 import os
 import socket
 from pathlib import Path
-import pytest
-import pandas as pd
-import numpy as np
 
+import pytest
+
+from src.fairness_diagnostics import FairnessEvaluationReport, evaluate_subgroup_fairness
+from src.privacy_security import (
+    MAX_CSV_ROWS,
+    MAX_FILE_SIZE_BYTES,
+    assert_no_credential_fields,
+    create_audit_manifest,
+    sanitize_error_message,
+    validate_upload_security,
+    verify_network_isolation,
+)
 from src.real_data_contracts import (
     FileTypeError,
+    InvalidDataError,
+    ManualInputContract,
     OversizedFileError,
     PathTraversalError,
     SecurityViolationError,
-    InvalidDataError,
-    ManualInputContract,
-)
-from src.privacy_security import (
-    validate_upload_security,
-    assert_no_credential_fields,
-    sanitize_error_message,
-    create_audit_manifest,
-    verify_network_isolation,
-    MAX_FILE_SIZE_BYTES,
-    MAX_CSV_ROWS,
 )
 from src.real_data_parser import parse_csv_statement
 from src.real_data_scoring import assess_statement_end_to_end
-from src.fairness_diagnostics import evaluate_subgroup_fairness, FairnessEvaluationReport
-
 
 # -----------------------------------------------------------------------------
 # 1. DEFENSIVE UPLOAD & FILE-TYPE VALIDATION TESTS
@@ -106,7 +103,7 @@ def test_max_csv_rows_dos_safeguard():
     # Construct CSV exceeding MAX_CSV_ROWS (simulate 50,001 rows)
     lines = ["Date,Amount,Counterparty"] + ["2023-01-01,100,Merchant"] * (MAX_CSV_ROWS + 1)
     huge_csv_text = "\n".join(lines)
-    
+
     with pytest.raises(InvalidDataError) as excinfo:
         parse_csv_statement(huge_csv_text)
     assert f"exceeds maximum allowed limit of {MAX_CSV_ROWS:,} rows" in str(excinfo.value)
@@ -137,8 +134,8 @@ def test_raw_statement_is_never_written_to_disk(tmp_path):
     project_root = Path(__file__).resolve().parent.parent
     scanned_files = 0
     for root, dirs, files in os.walk(project_root):
-        # Exclude git, pycache, and test file itself
-        if any(ignored in root for ignored in [".git", "__pycache__", ".pytest_cache"]):
+        # Exclude git, pycache, venv, and test file itself
+        if any(ignored in root for ignored in [".git", "__pycache__", ".pytest_cache", ".venv"]):
             continue
         for file in files:
             if file.endswith(".pyc") or file == "test_privacy_security.py":

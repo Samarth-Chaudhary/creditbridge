@@ -1,0 +1,15 @@
+{
+  "dataset_version": "v2.0-temporal",
+  "dataset_hash": "8a5822d3e57b76746036d8a222885de565a371bb183dc38298fcf9a02c214d92",
+  "dataset_path": "data/synthetic_borrowers.csv",
+  "row_count": 8000,
+  "column_count": 25,
+  "target_column": "defaulted",
+  "class_0_count": 7183,
+  "class_1_count": 817,
+  "default_rate": 0.1021,
+  "train_rows": 5000,
+  "val_rows": 1500,
+  "test_rows": 750,
+  "oot_rows": 1500
+}

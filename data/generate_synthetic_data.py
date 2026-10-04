@@ -10,6 +10,7 @@ behavioral/transactional proxy signals and latent creditworthiness.
 
 import os
 import uuid
+
 import numpy as np
 import pandas as pd
 from faker import Faker
@@ -186,7 +187,7 @@ def print_data_dictionary():
 def generate_synthetic_data(num_samples: int = NUM_BORROWERS) -> pd.DataFrame:
     """
     Generates realistic synthetic alternative credit data for gig & thin-file borrowers.
-    
+
     Generative Design Architecture:
     -------------------------------
     1. Demographics & Stratification:
@@ -274,10 +275,10 @@ def generate_synthetic_data(num_samples: int = NUM_BORROWERS) -> pd.DataFrame:
     # Realistic noise: 15-20% of high-income borrowers still show payment volatility (forgetfulness, travel, disputes)
     norm_income = (monthly_income_estimate - monthly_income_estimate.min()) / (monthly_income_estimate.max() - monthly_income_estimate.min())
     norm_age = (age - 18.0) / (60.0 - 18.0)
-    
+
     # Base on-time propensity (0 to 1)
     base_ontime_propensity = 0.40 + 0.35 * norm_income + 0.25 * norm_age
-    
+
     # Inject 18% random behavioral noise
     noise_mask = np.random.rand(num_samples) < 0.18
     bill_noise = np.random.uniform(-0.35, 0.20, size=num_samples)
@@ -375,7 +376,7 @@ def generate_synthetic_data(num_samples: int = NUM_BORROWERS) -> pd.DataFrame:
     # 2.4 Gig-platform earnings stability
     # Populated strictly for gig_delivery and gig_rideshare, NaN / null for other professions
     is_gig_worker = np.isin(occupation_type, ["gig_delivery", "gig_rideshare"])
-    
+
     avg_weekly_gig_hours = np.full(num_samples, np.nan)
     gig_platform_rating = np.full(num_samples, np.nan)
     active_weeks_last_6_months = np.full(num_samples, np.nan)
@@ -414,7 +415,7 @@ def generate_synthetic_data(num_samples: int = NUM_BORROWERS) -> pd.DataFrame:
     # - Payment consistency (30% weight): Utility bill ontime rate + telecom lapse avoidance
     # - Earnings volatility (20% weight): Low recharge & gig earnings volatility
     # - Digital footprint stability (10% weight): Long SIM tenure + established app account age
-    # 
+    #
     # All sub-scores are normalized to [0, 1] where 1.0 indicates highest creditworthiness.
 
     # 3.1 Income stability subscore (40%)
@@ -428,7 +429,7 @@ def generate_synthetic_data(num_samples: int = NUM_BORROWERS) -> pd.DataFrame:
     norm_utility_ontime = electricity_bill_ontime_rate  # already 0 to 1
     norm_delay = 1.0 - np.clip(electricity_bill_avg_delay_days / 30.0, 0.0, 1.0)
     norm_lapse = np.clip(days_since_last_recharge_lapse / 180.0, 0.0, 1.0)
-    
+
     # Incorporate gig activity for gig workers if present
     gig_bonus = np.zeros(num_samples)
     for i in range(num_samples):
@@ -468,7 +469,7 @@ def generate_synthetic_data(num_samples: int = NUM_BORROWERS) -> pd.DataFrame:
     beta_0 = 1.45
     beta_1 = 6.20
     irreducible_noise = np.random.normal(loc=0.0, scale=0.75, size=num_samples)
-    
+
     log_odds = beta_0 - (beta_1 * latent_creditworthiness) + irreducible_noise
     prob_default = 1.0 / (1.0 + np.exp(-log_odds))
 
@@ -514,7 +515,7 @@ def generate_synthetic_data(num_samples: int = NUM_BORROWERS) -> pd.DataFrame:
         "days_since_last_recharge_lapse": 0.03,
         "electricity_bill_avg_delay_days": 0.025
     }
-    
+
     for col, rate in missing_cols_rates.items():
         missing_indices = np.random.choice(num_samples, size=int(num_samples * rate), replace=False)
         df.loc[missing_indices, col] = np.nan
@@ -534,16 +535,21 @@ def generate_synthetic_data(num_samples: int = NUM_BORROWERS) -> pd.DataFrame:
 
 def main():
     print_data_dictionary()
-    print("\nGenerating 8,000 synthetic borrower profiles with realistic alt-data proxy signals...")
-    df = generate_synthetic_data(num_samples=NUM_BORROWERS)
+    print("\nGenerating 8,000 synthetic borrower profiles with defensible temporal simulation...")
+    import sys
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    from src.temporal_data_generator import generate_full_temporal_dataset
+
+    df = generate_full_temporal_dataset(seed=RANDOM_SEED)
 
     default_rate = df["defaulted"].mean() * 100
-    print(f"\n[Generated Dataset Summary]")
+    print("\n[Generated Temporal Dataset Summary]")
     print(f"Total records: {len(df)}")
     print(f"Total columns: {len(df.columns)}")
-    print(f"Target 'defaulted' rate: {default_rate:.2f}% (Target specification: ~12-15%)")
-    
-    # Verify non-trivial correlations
+    print(f"Target 'defaulted' rate: {default_rate:.2f}% (Target specification: ~10-15%)")
+    print(f"Cohort splits: {dict(df['cohort_split'].value_counts())}")
+
+    # Verify risk gradients
     high_vol_def = df[df["upi_inflow_volatility_coefficient"] > df["upi_inflow_volatility_coefficient"].median()]["defaulted"].mean() * 100
     low_vol_def = df[df["upi_inflow_volatility_coefficient"] <= df["upi_inflow_volatility_coefficient"].median()]["defaulted"].mean() * 100
     print(f"Default rate for High UPI Volatility borrowers: {high_vol_def:.2f}%")
@@ -554,7 +560,7 @@ def main():
     data_dir = os.path.dirname(os.path.abspath(__file__))
     output_path = os.path.join(data_dir, "synthetic_borrowers.csv")
     df.to_csv(output_path, index=False)
-    print(f"\nSaved synthetic dataset to: {output_path}")
+    print(f"\nSaved synthetic temporal dataset to: {output_path}")
 
 
 if __name__ == "__main__":

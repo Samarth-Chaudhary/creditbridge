@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp_phase1_20261004T060633Z",
+  "timestamp": "20261004T060633Z",
+  "git_commit": "5c7fd7624fc73896b50f69391c94cb145c165516",
+  "random_seed": 42,
+  "status": "CHAMPION",
+  "model_name": "Logistic Regression",
+  "hyperparameters": {
+    "C": 0.5,
+    "class_weight": "balanced"
+  }
+}

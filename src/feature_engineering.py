@@ -8,12 +8,12 @@ and construction of domain-informed composite alt-data features. Exposes the
 standard interface: prepare_features(df) -> X, y.
 """
 
+from typing import Optional, Tuple
+
 import numpy as np
 import pandas as pd
-from typing import Tuple, Optional, Dict, Any
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.impute import SimpleImputer
-
+from sklearn.preprocessing import OneHotEncoder
 
 # -----------------------------------------------------------------------------
 # DEFENSIVE DESIGN & DOMAIN RATIONALE (INTERVIEW TALKING POINTS)
@@ -51,7 +51,7 @@ class FeaturePipeline:
         self.numeric_imputer = SimpleImputer(strategy="median")
         self.categorical_imputer = SimpleImputer(strategy="most_frequent")
         self.one_hot_encoder = OneHotEncoder(sparse_output=False, handle_unknown="ignore")
-        
+
         self.categorical_cols = ["occupation_type", "city_tier"]
         self.gig_cols = [
             "avg_weekly_gig_hours",
@@ -77,7 +77,7 @@ class FeaturePipeline:
         # We clip to benchmark ceilings, compute weighted average volatility, and invert to a 0-100 index.
         recharge_vol_norm = np.clip(df["recharge_amount_volatility"] / 0.80, 0.0, 1.0)
         upi_vol_norm = np.clip(df["upi_inflow_volatility_coefficient"] / 0.90, 0.0, 1.0)
-        
+
         composite_volatility = (0.45 * recharge_vol_norm) + (0.55 * upi_vol_norm)
         df["income_stability_index"] = np.round((1.0 - composite_volatility) * 100.0, 2)
 
@@ -86,9 +86,9 @@ class FeaturePipeline:
         ontime_component = df["electricity_bill_ontime_rate"] * 50.0  # Up to 50 points
         delay_penalty = np.clip(df["electricity_bill_avg_delay_days"] / 30.0, 0.0, 1.0) * 25.0 # Up to -25 points
         lapse_component = np.clip(df["days_since_last_recharge_lapse"] / 180.0, 0.0, 1.0) * 25.0 # Up to 25 points
-        
+
         base_reliability = ontime_component + (25.0 - delay_penalty) + lapse_component
-        
+
         # Gig consistency bonus/adjustment
         is_gig = df["occupation_type"].isin(["gig_delivery", "gig_rideshare"])
         gig_active_ratio = np.where(
@@ -96,7 +96,7 @@ class FeaturePipeline:
             np.clip(df["active_weeks_last_6_months"] / 26.0, 0.0, 1.0),
             0.75  # Neutral default for informal non-gig workers
         )
-        
+
         # Scale to 0-100 bounded score
         df["payment_reliability_score"] = np.round(
             np.clip(0.70 * base_reliability + 30.0 * gig_active_ratio, 0.0, 100.0),
@@ -118,7 +118,8 @@ class FeaturePipeline:
         df_work = self._compute_composite_features(df_work)
 
         # Determine all non-categorical, non-ID, non-target numeric columns
-        cols_to_exclude = [self.id_col, self.target_col] + self.categorical_cols
+        metadata_cols = ["cohort_split", "observation_cutoff"]
+        cols_to_exclude = [self.id_col, self.target_col] + self.categorical_cols + metadata_cols
         self.numeric_cols = [c for c in df_work.columns if c not in cols_to_exclude]
 
         # Fit numeric imputer
@@ -164,13 +165,13 @@ _DEFAULT_PIPELINE = FeaturePipeline()
 def prepare_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, Optional[pd.Series]]:
     """
     Main entry point for Stage 1 & Stage 2 feature preparation.
-    
+
     Parameters:
     -----------
     df : pd.DataFrame
         Raw or synthetic borrower dataframe containing demographic,
         transactional, and behavioral proxy signals.
-        
+
     Returns:
     --------
     X : pd.DataFrame
@@ -187,7 +188,7 @@ def prepare_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, Optional[pd.Series
     # Fit and transform
     if not _DEFAULT_PIPELINE.is_fitted:
         _DEFAULT_PIPELINE.fit(df)
-    
+
     X = _DEFAULT_PIPELINE.transform(df)
 
     return X, y
@@ -224,7 +225,7 @@ if __name__ == "__main__":
     print(f"Target vector y shape:   {y.shape if y is not None else 'None'}")
     print(f"Remaining null values in X: {X.isnull().sum().sum()}")
     print(f"Total engineered features: {X.shape[1]}")
-    
+
     print("\nDerived composite features summary:")
     print(X[["income_stability_index", "payment_reliability_score"]].describe().T[["mean", "std", "min", "50%", "max"]])
 

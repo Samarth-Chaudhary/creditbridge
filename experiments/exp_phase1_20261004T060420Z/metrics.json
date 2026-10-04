@@ -1,0 +1,185 @@
+{
+  "train": {
+    "roc_auc": 0.9939,
+    "pr_auc": 0.9391,
+    "ks_statistic": 95.2,
+    "gini": 0.9878,
+    "brier_score": 0.0316,
+    "precision": 0.7263,
+    "recall": 0.9919,
+    "f1": 0.8386,
+    "confusion_matrix": [
+      [
+        4320,
+        185
+      ],
+      [
+        4,
+        491
+      ]
+    ],
+    "calibration_intercept": -2.2386,
+    "calibration_slope": 1.4867,
+    "ci_95": null
+  },
+  "validation": {
+    "roc_auc": 0.9688,
+    "pr_auc": 0.8613,
+    "ks_statistic": 80.49,
+    "gini": 0.9375,
+    "brier_score": 0.0444,
+    "precision": 0.6869,
+    "recall": 0.8293,
+    "f1": 0.7514,
+    "confusion_matrix": [
+      [
+        1274,
+        62
+      ],
+      [
+        28,
+        136
+      ]
+    ],
+    "calibration_intercept": -1.1482,
+    "calibration_slope": 1.0464,
+    "ci_95": null
+  },
+  "test": {
+    "roc_auc": 0.9731,
+    "pr_auc": 0.8786,
+    "ks_statistic": 82.42,
+    "gini": 0.9463,
+    "brier_score": 0.0472,
+    "precision": 0.6783,
+    "recall": 0.8667,
+    "f1": 0.761,
+    "confusion_matrix": [
+      [
+        623,
+        37
+      ],
+      [
+        12,
+        78
+      ]
+    ],
+    "calibration_intercept": -1.2646,
+    "calibration_slope": 1.0926,
+    "ci_95": null
+  },
+  "oot": {
+    "roc_auc": 0.9587,
+    "pr_auc": 0.7799,
+    "ks_statistic": 81.86,
+    "gini": 0.9175,
+    "brier_score": 0.0511,
+    "precision": 0.6436,
+    "recall": 0.7658,
+    "f1": 0.6994,
+    "confusion_matrix": [
+      [
+        1275,
+        67
+      ],
+      [
+        37,
+        121
+      ]
+    ],
+    "calibration_intercept": -1.1802,
+    "calibration_slope": 0.8913,
+    "ci_95": {
+      "roc_auc_ci": [
+        0.9437,
+        0.9713
+      ],
+      "ks_statistic_ci": [
+        77.57,
+        86.42
+      ],
+      "pr_auc_ci": [
+        0.713,
+        0.8414
+      ]
+    }
+  },
+  "champion_selection": {
+    "decision": "NO-CHAMPION",
+    "champion_name": null,
+    "rationale": "No candidate satisfied all mandatory model-risk gates. Production promotion blocked.",
+    "gates_evaluated": {
+      "Logistic Regression": {
+        "discrimination_gate": {
+          "passed": true,
+          "oot_auc": 0.9669,
+          "oot_ks": 82.3
+        },
+        "stability_gate": {
+          "passed": true,
+          "delta": 0.0103
+        },
+        "calibration_gate": {
+          "passed": true,
+          "slope": 0.7832
+        },
+        "fairness_gate": {
+          "passed": false,
+          "min_air": 0.3243
+        },
+        "explainability_gate": {
+          "passed": true
+        }
+      },
+      "XGBoost Classifier": {
+        "discrimination_gate": {
+          "passed": true,
+          "oot_auc": 0.9587,
+          "oot_ks": 81.86
+        },
+        "stability_gate": {
+          "passed": true,
+          "delta": 0.0101
+        },
+        "calibration_gate": {
+          "passed": true,
+          "slope": 0.8518
+        },
+        "fairness_gate": {
+          "passed": false,
+          "min_air": 0.3243
+        },
+        "explainability_gate": {
+          "passed": true
+        }
+      }
+    },
+    "failure_reasons": [
+      "Logistic Regression failed gates: ['fairness_gate']",
+      "XGBoost Classifier failed gates: ['fairness_gate']"
+    ]
+  },
+  "economic_decisioning": {
+    "total_applicants": 1500,
+    "approval_count": 1189,
+    "approval_rate": 0.7927,
+    "review_count": 100,
+    "review_rate": 0.0667,
+    "decline_count": 211,
+    "decline_rate": 0.1407,
+    "total_portfolio_expected_loss": 2568644.98,
+    "approved_expected_loss": 163476.18,
+    "population_base_bad_rate": 0.1053,
+    "approved_cohort_bad_rate": 0.0093,
+    "declined_cohort_bad_rate": 0.6161,
+    "reviewed_cohort_bad_rate": 0.17,
+    "bad_rate_reduction_pct": 91.22,
+    "policy_config": {
+      "auto_approve_max_pd": 0.08,
+      "manual_review_max_pd": 0.2,
+      "min_score_cutoff": 650,
+      "default_lgd": 0.65,
+      "default_ead": 25000.0
+    }
+  }
+}
