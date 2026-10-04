@@ -5,9 +5,8 @@
 [![Code Style](https://img.shields.io/badge/Ruff-Passed-brightgreen?logo=python)](ruff.toml)
 [![Python Version](https://img.shields.io/badge/Python-3.11-blue?logo=python)](requirements.lock)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Streamlit Dashboard](https://img.shields.io/badge/Streamlit-9--Tab%20Interactive%20Console-FF4B4B?logo=streamlit)](dashboard/app.py)
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Underwriting%20Portal-10B981?logo=githubpages)](https://samarth-chaudhary.github.io/creditbridge/)
-[![Hosted App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://samarth-chaudhary-creditbridge-dashboardapp-vzrsrp.streamlit.app)
+[![Live Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://samarth-chaudhary-creditbridge-dashboardapp-vzrsrp.streamlit.app)
+[![Streamlit Console](https://img.shields.io/badge/Live%20Dashboard-Streamlit%20Cloud-FF4B4B?logo=streamlit)](https://samarth-chaudhary-creditbridge-dashboardapp-vzrsrp.streamlit.app)
 
 > [!IMPORTANT]
 > **RESEARCH & ENGINEERING PROTOTYPE DISCLOSURE**:
@@ -195,15 +194,15 @@ ruff check .
 python src/phase2_governance_runner.py
 ```
 
-### 5.5 Dashboard Hosting & Live Access
-The official 9-tab **Streamlit Master Underwriting & Governance Dashboard** (`dashboard/app.py`) is hosted on GitHub:
-1. **GitHub Pages Streamlit Portal**:
-   - **URL**: [https://samarth-chaudhary.github.io/creditbridge/](https://samarth-chaudhary.github.io/creditbridge/)
-   - **Behavior**: Seamlessly displays the full Streamlit dashboard directly on GitHub Pages via automated CI/CD ([`.github/workflows/pages.yml`](.github/workflows/pages.yml)).
-2. **Streamlit Community Cloud Direct Launch**:
-   - **Live App URL**: [https://samarth-chaudhary-creditbridge-dashboardapp-vzrsrp.streamlit.app](https://samarth-chaudhary-creditbridge-dashboardapp-vzrsrp.streamlit.app)
-   - **Architecture**: Runs the complete 9-tab operational suite (Executive Overview, Borrower Assessment with SHAP explainability, Decile Calibration, Fair Lending Disparate Impact Auditing, Data Quality Provenance, Population Drift PSI Surveillance, Economic Policy Simulator, Model Registry Integrity, and Limitations).
-   - **Theme**: Pinned to dark fintech tokens in [`.streamlit/config.toml`](.streamlit/config.toml).
+### 5.5 Live Streamlit Underwriting Dashboard
+The official 9-tab **Streamlit Master Underwriting & Governance Dashboard** is live and publicly accessible:
+
+👉 **[Launch CreditBridge Live Dashboard](https://samarth-chaudhary-creditbridge-dashboardapp-vzrsrp.streamlit.app)**  
+**Direct URL**: `https://samarth-chaudhary-creditbridge-dashboardapp-vzrsrp.streamlit.app`
+
+- **Architecture**: Runs the complete 9-tab operational suite (Executive Overview, Borrower Assessment with SHAP explainability, Decile Calibration, Fair Lending Disparate Impact Auditing, Data Quality Provenance, Population Drift PSI Surveillance, Economic Policy Simulator, Model Registry Integrity, and Limitations).
+- **Public Visibility**: Completely public — visible to anyone with the link with zero login or installation required.
+- **Theme**: Pinned to dark fintech tokens in [`.streamlit/config.toml`](.streamlit/config.toml).
 
 ---
 
