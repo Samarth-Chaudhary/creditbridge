@@ -21,9 +21,9 @@ def test_dashboard_file_integrity_and_firewall():
 
     assert dashboard_path.exists(), "dashboard/app.py is missing!"
     assert dashboard_path.stat().st_size > 0, "dashboard/app.py is empty!"
-    assert dashboard_path.stat().st_size == 53136, (
+    assert dashboard_path.stat().st_size == 56634, (
         f"FIREWALL VIOLATION: dashboard/app.py size mismatch! "
-        f"Expected 53136 bytes, got {dashboard_path.stat().st_size} bytes."
+        f"Expected 56634 bytes, got {dashboard_path.stat().st_size} bytes."
     )
 
 

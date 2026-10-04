@@ -109,11 +109,21 @@ header[data-testid="stHeader"] {
     max-width: 1560px !important;
 }
 
+@media (max-width: 992px) {
+    .fin-sidebar {
+        display: none !important;
+    }
+    .block-container {
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+    }
+}
+
 .fin-topbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0 20px 0;
+    padding: 12px 0 20px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     margin-bottom: 24px;
 }
@@ -127,6 +137,11 @@ header[data-testid="stHeader"] {
     padding: 6px 14px;
     width: 280px;
     gap: 8px;
+    transition: border-color 0.2s ease;
+}
+
+.fin-search-container:focus-within {
+    border-color: rgba(232, 121, 46, 0.40);
 }
 
 .fin-search-input {
@@ -168,6 +183,17 @@ header[data-testid="stHeader"] {
     cursor: pointer;
     font-size: 0.95rem;
     position: relative;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.fin-action-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #F5F1EA;
+}
+
+.fin-action-btn:focus-visible {
+    outline: 2px solid #E8792E;
+    outline-offset: 2px;
 }
 
 .fin-badge-dot {
@@ -276,6 +302,7 @@ header[data-testid="stHeader"] {
     justify-content: center;
     color: #6E655D;
     cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
 .fin-nav-icon.active {
@@ -300,17 +327,23 @@ header[data-testid="stHeader"] {
     position: relative;
     overflow: hidden;
     margin-bottom: 16px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.fin-card:hover {
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 .fin-card-hero {
     background: linear-gradient(160deg, #2C221A 0%, #1E1712 100%);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
+    border-radius: 16px;
     padding: 24px;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.32);
     position: relative;
     overflow: hidden;
     margin-bottom: 16px;
+    transition: border-color 0.2s ease;
 }
 
 .fin-card-title {
@@ -328,6 +361,17 @@ header[data-testid="stHeader"] {
     color: #F5F1EA;
     letter-spacing: -0.02em;
     line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+}
+
+.fin-stat-sub {
+    font-size: 0.80rem;
+    line-height: 1.4;
+    margin-top: 6px;
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+    font-variant-numeric: tabular-nums;
 }
 
 .fin-pill-delta {
@@ -339,6 +383,7 @@ header[data-testid="stHeader"] {
     font-size: 0.72rem;
     font-weight: 600;
     margin-left: 8px;
+    font-variant-numeric: tabular-nums;
 }
 
 .fin-delta-up {
@@ -403,6 +448,14 @@ header[data-testid="stHeader"] {
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     margin-bottom: 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+}
+
+.stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+    display: none;
 }
 
 .stTabs [data-baseweb="tab"] {
@@ -414,6 +467,7 @@ header[data-testid="stHeader"] {
     padding: 0 14px !important;
     border: none !important;
     background: transparent !important;
+    white-space: nowrap !important;
 }
 
 .stTabs [aria-selected="true"] {
@@ -530,8 +584,8 @@ scored_df = get_scored_portfolio_data()
 st.markdown(
     """
 <div class="fin-sidebar">
-    <div class="fin-brand-logo" title="CreditBridge Intelligence">
-        <svg viewBox="0 0 24 24">
+    <div class="fin-brand-logo" title="CreditBridge Intelligence" aria-label="CreditBridge Intelligence">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
             <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
             <line x1="12" y1="22" x2="12" y2="15.5"></line>
             <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
@@ -540,8 +594,8 @@ st.markdown(
         </svg>
     </div>
     <div class="fin-nav-stack">
-        <div class="fin-nav-icon active" title="Executive Console">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="fin-nav-icon active" title="Executive Console" role="button" aria-label="Executive Console Navigation" tabindex="0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
@@ -557,16 +611,16 @@ st.markdown(
 <div class="fin-topbar">
     <div style="display: flex; align-items: center; gap: 14px;">
         <div class="fin-search-container">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9C9088" stroke-width="2">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9C9088" stroke-width="2" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input class="fin-search-input" placeholder="Search applicant UUID, cohort, rule..." />
+            <input class="fin-search-input" placeholder="Search applicant UUID, cohort, rule..." aria-label="Search applicant UUID, cohort, rule" />
         </div>
         <div class="fin-shortcut-pill">Phase 3 Master Build</div>
     </div>
     <div class="fin-topbar-actions">
-        <a class="fin-action-btn" title="System Operational">⟳</a>
+        <a class="fin-action-btn" title="System Operational" role="button" aria-label="System Refresh Status" tabindex="0">⟳</a>
         <div class="fin-profile-chip">
             <div class="fin-avatar">CB</div>
             <div class="fin-profile-info">
@@ -636,7 +690,7 @@ with tab_overview:
         <div class="fin-card">
             <div class="fin-card-title">Evaluated Portfolio Volume</div>
             <div class="fin-stat-number">₹{total_vol_cr:.2f} Cr</div>
-            <div style="font-size: 0.80rem; color: #9C9088; margin-top: 6px;">
+            <div class="fin-stat-sub" style="color: #9C9088;">
                 {total_borrowers:,} Underwritten Borrowers
             </div>
         </div>
@@ -649,7 +703,7 @@ with tab_overview:
         <div class="fin-card">
             <div class="fin-card-title">Portfolio Mean Score</div>
             <div class="fin-stat-number">{mean_score:.0f} <span style="font-size: 1rem; color: #9C9088;">/ 900</span></div>
-            <div style="font-size: 0.80rem; color: #4ADE80; margin-top: 6px;">
+            <div class="fin-stat-sub" style="color: #4ADE80;">
                 Calibrated PD: {mean_pd:.1f}% (Base: {actual_def_rate:.1f}%)
             </div>
         </div>
@@ -662,7 +716,7 @@ with tab_overview:
         <div class="fin-card">
             <div class="fin-card-title">Policy Approval Rate</div>
             <div class="fin-stat-number">{app_rate:.1f}%</div>
-            <div style="font-size: 0.80rem; color: #F2C94C; margin-top: 6px;">
+            <div class="fin-stat-sub" style="color: #F2C94C;">
                 Review: {rev_rate:.1f}% • Decline: {dec_rate:.1f}%
             </div>
         </div>
@@ -675,7 +729,7 @@ with tab_overview:
         <div class="fin-card">
             <div class="fin-card-title">Approved Expected Loss</div>
             <div class="fin-stat-number">₹{app_loss_inr:,.0f}</div>
-            <div style="font-size: 0.80rem; color: #4ADE80; margin-top: 6px;">
+            <div class="fin-stat-sub" style="color: #4ADE80;">
                 Bad Rate: {pol_eval["approved_cohort_bad_rate"] * 100:.2f}% (vs {pol_eval["population_base_bad_rate"] * 100:.1f}%)
             </div>
         </div>
@@ -702,18 +756,29 @@ with tab_overview:
                 "Very High Risk": "#F87171",
             },
         )
+        fig_dist.update_traces(
+            hovertemplate="Score: %{x}<br>Applicants: %{y:,}<extra></extra>"
+        )
         fig_dist.update_layout(
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            margin={"l": 10, "r": 10, "t": 10, "b": 10},
-            height=280,
+            margin={"l": 48, "r": 16, "t": 32, "b": 44},
+            height=300,
             xaxis={
                 "title": "Score (300 - 900)",
                 "gridcolor": "rgba(255,255,255,0.05)",
-                "tickfont": {"color": "#9C9088"},
+                "tickfont": {"color": "#9C9088", "size": 11},
             },
-            yaxis={"title": "Applicant Count", "gridcolor": "rgba(255,255,255,0.05)", "tickfont": {"color": "#9C9088"}},
-            legend={"font": {"color": "#F5F1EA"}, "bgcolor": "rgba(0,0,0,0)", "y": 0.95},
+            yaxis={"title": "Applicant Count", "gridcolor": "rgba(255,255,255,0.05)", "tickfont": {"color": "#9C9088", "size": 11}},
+            legend={
+                "font": {"color": "#F5F1EA", "size": 11},
+                "bgcolor": "rgba(0,0,0,0)",
+                "orientation": "h",
+                "yanchor": "bottom",
+                "y": 1.02,
+                "xanchor": "right",
+                "x": 1.0,
+            },
         )
         st.plotly_chart(fig_dist, width="stretch", config={"displayModeBar": False})
         st.markdown("</div>", unsafe_allow_html=True)
@@ -735,15 +800,24 @@ with tab_overview:
                     marker={"colors": ["#4ADE80", "#E8792E", "#F87171"]},
                     textinfo="percent",
                     textfont={"color": "#F5F1EA"},
+                    hovertemplate="%{label}<br>Applicants: %{value:,}<br>Share: %{percent}<extra></extra>",
                 )
             ]
         )
         fig_pie.update_layout(
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            margin={"l": 10, "r": 10, "t": 10, "b": 10},
-            height=280,
-            legend={"font": {"color": "#9C9088", "size": 11}, "bgcolor": "rgba(0,0,0,0)", "orientation": "h"},
+            margin={"l": 16, "r": 16, "t": 32, "b": 44},
+            height=300,
+            legend={
+                "font": {"color": "#9C9088", "size": 11},
+                "bgcolor": "rgba(0,0,0,0)",
+                "orientation": "h",
+                "yanchor": "bottom",
+                "y": -0.15,
+                "xanchor": "center",
+                "x": 0.5,
+            },
         )
         st.plotly_chart(fig_pie, width="stretch", config={"displayModeBar": False})
         st.markdown("</div>", unsafe_allow_html=True)
@@ -757,11 +831,18 @@ with tab_borrower:
         unsafe_allow_html=True,
     )
     borrower_options = scored_df["borrower_id"].tolist()
+    if not borrower_options:
+        st.info("No underwritten applicants found in the current cohort.")
+        st.stop()
     default_idx = 10 if len(borrower_options) > 10 else 0
     sel_id = st.selectbox("Select Applicant UUID:", borrower_options, index=default_idx)
 
     if sel_id:
-        b_row = scored_df[scored_df["borrower_id"] == sel_id].iloc[0]
+        matching_rows = scored_df[scored_df["borrower_id"] == sel_id]
+        if matching_rows.empty:
+            st.warning("Selected applicant record is unavailable.")
+            st.stop()
+        b_row = matching_rows.iloc[0]
         exp_res = explain_single_borrower(sel_id, df=scored_df)
         b_score = int(exp_res["credit_score"])
         b_tier = str(exp_res["risk_tier"])
@@ -872,7 +953,7 @@ with tab_borrower:
             )
             st.markdown(
                 f"""
-                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #9C9088;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #9C9088; gap: 8px; white-space: nowrap;">
                     <span>Occupation: <strong style="color: #F5F1EA;">{b_row["occupation_type"]}</strong></span>
                     <span>City: <strong style="color: #F5F1EA;">{b_row["city_tier"]}</strong></span>
                     <span>Income: <strong style="color: #4ADE80;">₹{b_row["monthly_income_estimate"]:,.0f}</strong></span>
@@ -964,7 +1045,12 @@ with tab_perf:
         fig_roc = go.Figure()
         fig_roc.add_trace(
             go.Scatter(
-                x=fpr, y=tpr, mode="lines", name="Champion LR (AUC=0.624)", line={"color": "#E8792E", "width": 2.5}
+                x=fpr,
+                y=tpr,
+                mode="lines",
+                name="Champion LR (AUC=0.624)",
+                line={"color": "#E8792E", "width": 2.5},
+                hovertemplate="FPR: %{x:.3f}<br>TPR: %{y:.3f}<extra>Champion LR</extra>",
             )
         )
         fig_roc.add_trace(
@@ -974,24 +1060,25 @@ with tab_perf:
                 mode="lines",
                 name="Random Guess",
                 line={"color": "rgba(255,255,255,0.2)", "dash": "dash"},
+                hovertemplate="FPR: %{x:.3f}<br>TPR: %{y:.3f}<extra>Random Guess</extra>",
             )
         )
         fig_roc.update_layout(
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            margin={"l": 10, "r": 10, "t": 10, "b": 10},
-            height=260,
+            margin={"l": 48, "r": 16, "t": 20, "b": 44},
+            height=280,
             xaxis={
                 "title": "False Positive Rate",
                 "gridcolor": "rgba(255,255,255,0.05)",
-                "tickfont": {"color": "#9C9088"},
+                "tickfont": {"color": "#9C9088", "size": 11},
             },
             yaxis={
                 "title": "True Positive Rate",
                 "gridcolor": "rgba(255,255,255,0.05)",
-                "tickfont": {"color": "#9C9088"},
+                "tickfont": {"color": "#9C9088", "size": 11},
             },
-            legend={"font": {"color": "#F5F1EA"}, "bgcolor": "rgba(0,0,0,0)"},
+            legend={"font": {"color": "#F5F1EA", "size": 11}, "bgcolor": "rgba(0,0,0,0)"},
         )
         st.plotly_chart(fig_roc, width="stretch", config={"displayModeBar": False})
         st.markdown("</div>", unsafe_allow_html=True)
@@ -1013,29 +1100,35 @@ with tab_perf:
                 mode="lines",
                 name="Non-Defaulters (Goods)",
                 line={"color": "#4ADE80", "width": 2},
+                hovertemplate="Cutoff: %{x:.3f}<br>Goods Cumulative: %{y:.1%}<extra>Goods</extra>",
             )
         )
         fig_ks.add_trace(
             go.Scatter(
-                x=thresholds, y=bads_cdf, mode="lines", name="Defaulters (Bads)", line={"color": "#F87171", "width": 2}
+                x=thresholds,
+                y=bads_cdf,
+                mode="lines",
+                name="Defaulters (Bads)",
+                line={"color": "#F87171", "width": 2},
+                hovertemplate="Cutoff: %{x:.3f}<br>Bads Cumulative: %{y:.1%}<extra>Bads</extra>",
             )
         )
         fig_ks.update_layout(
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            margin={"l": 10, "r": 10, "t": 10, "b": 10},
-            height=260,
+            margin={"l": 48, "r": 16, "t": 20, "b": 44},
+            height=280,
             xaxis={
                 "title": "Probability Cutoff",
                 "gridcolor": "rgba(255,255,255,0.05)",
-                "tickfont": {"color": "#9C9088"},
+                "tickfont": {"color": "#9C9088", "size": 11},
             },
             yaxis={
                 "title": "Cumulative Share",
                 "gridcolor": "rgba(255,255,255,0.05)",
-                "tickfont": {"color": "#9C9088"},
+                "tickfont": {"color": "#9C9088", "size": 11},
             },
-            legend={"font": {"color": "#F5F1EA"}, "bgcolor": "rgba(0,0,0,0)"},
+            legend={"font": {"color": "#F5F1EA", "size": 11}, "bgcolor": "rgba(0,0,0,0)"},
         )
         st.plotly_chart(fig_ks, width="stretch", config={"displayModeBar": False})
         st.markdown("</div>", unsafe_allow_html=True)
@@ -1328,6 +1421,17 @@ with tab_registry:
         st.markdown('<div class="fin-card">', unsafe_allow_html=True)
         st.dataframe(pd.DataFrame(reg_rows), width="stretch", hide_index=True)
         st.markdown("</div>", unsafe_allow_html=True)
+    else:
+        st.markdown(
+            """
+        <div class="fin-card">
+            <div style="font-size: 0.85rem; color: #9C9088;">
+                Institutional Model Registry initialized. Active champion artifact: <code>models/credit_model.pkl</code>.
+            </div>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
 
     # Security disclosure
     st.markdown(
