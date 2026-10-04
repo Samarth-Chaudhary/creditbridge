@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Pytest (111 Tests) & Static Type Check
+    name: Pytest (157 Tests) & Static Type Check
     runs-on: ubuntu-latest
 
     steps:

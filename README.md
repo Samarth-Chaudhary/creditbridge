@@ -6,7 +6,8 @@
 [![Python Version](https://img.shields.io/badge/Python-3.11-blue?logo=python)](requirements.lock)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Streamlit Dashboard](https://img.shields.io/badge/Streamlit-9--Tab%20Interactive%20Console-FF4B4B?logo=streamlit)](dashboard/app.py)
-[![Hosted App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://creditbridge.streamlit.app)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Underwriting%20Portal-10B981?logo=githubpages)](https://samarth-chaudhary.github.io/creditbridge/)
+[![Hosted App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=Samarth-Chaudhary/creditbridge&branch=main&mainModule=dashboard/app.py)
 
 > [!IMPORTANT]
 > **RESEARCH & ENGINEERING PROTOTYPE DISCLOSURE**:
@@ -193,6 +194,17 @@ ruff check .
 ```bash
 python src/phase2_governance_runner.py
 ```
+
+### 5.5 Dashboard Hosting & Live Access
+CreditBridge offers two hosted web interfaces:
+1. **GitHub Pages Live Underwriting Portal** (Zero-install web sandbox):
+   - **URL**: [https://samarth-chaudhary.github.io/creditbridge/](https://samarth-chaudhary.github.io/creditbridge/)
+   - **Features**: Interactive client-side borrower risk sandbox, dynamic FICO-scale scoring, real-time adverse action code generator, decile calibration table, and governance audit ledger.
+   - **Deployment**: Automatically built and deployed via [`.github/workflows/pages.yml`](.github/workflows/pages.yml) on push to `main`.
+2. **Streamlit Community Cloud** (Full 9-tab Python analytics console):
+   - **Launch URL**: [Deploy to Streamlit Cloud](https://share.streamlit.io/deploy?repository=Samarth-Chaudhary/creditbridge&branch=main&mainModule=dashboard/app.py)
+   - **Features**: Full SHAP explainability waterfall, population PSI/CSI drift tracking, policy tradeoff curves, model re-training engine, and cryptographic verification.
+   - **Configuration**: Theme tokens, port binding, and headless mode are configured in [`.streamlit/config.toml`](.streamlit/config.toml).
 
 ---
 
