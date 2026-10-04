@@ -196,15 +196,15 @@ python src/phase2_governance_runner.py
 ```
 
 ### 5.5 Dashboard Hosting & Live Access
-CreditBridge offers two hosted web interfaces:
-1. **GitHub Pages Live Underwriting Portal** (Zero-install web sandbox):
+The official 9-tab **Streamlit Master Underwriting & Governance Dashboard** (`dashboard/app.py`) is hosted on GitHub:
+1. **GitHub Pages Streamlit Portal**:
    - **URL**: [https://samarth-chaudhary.github.io/creditbridge/](https://samarth-chaudhary.github.io/creditbridge/)
-   - **Features**: Interactive client-side borrower risk sandbox, dynamic FICO-scale scoring, real-time adverse action code generator, decile calibration table, and governance audit ledger.
-   - **Deployment**: Automatically built and deployed via [`.github/workflows/pages.yml`](.github/workflows/pages.yml) on push to `main`.
-2. **Streamlit Community Cloud** (Full 9-tab Python analytics console):
-   - **Launch URL**: [Deploy to Streamlit Cloud](https://share.streamlit.io/deploy?repository=Samarth-Chaudhary/creditbridge&branch=main&mainModule=dashboard/app.py)
-   - **Features**: Full SHAP explainability waterfall, population PSI/CSI drift tracking, policy tradeoff curves, model re-training engine, and cryptographic verification.
-   - **Configuration**: Theme tokens, port binding, and headless mode are configured in [`.streamlit/config.toml`](.streamlit/config.toml).
+   - **Behavior**: Seamlessly displays the full Streamlit dashboard directly on GitHub Pages via automated CI/CD ([`.github/workflows/pages.yml`](.github/workflows/pages.yml)).
+2. **Streamlit Community Cloud Direct Launch**:
+   - **App URL**: [https://creditbridge.streamlit.app](https://creditbridge.streamlit.app)
+   - **1-Click Deploy**: [Deploy CreditBridge on Streamlit Cloud](https://share.streamlit.io/deploy?repository=Samarth-Chaudhary/creditbridge&branch=main&mainModule=dashboard/app.py)
+   - **Architecture**: Runs the complete 9-tab operational suite (Executive Overview, Borrower Assessment with SHAP explainability, Decile Calibration, Fair Lending Disparate Impact Auditing, Data Quality Provenance, Population Drift PSI Surveillance, Economic Policy Simulator, Model Registry Integrity, and Limitations).
+   - **Theme**: Pinned to dark fintech tokens in [`.streamlit/config.toml`](.streamlit/config.toml).
 
 ---
 
